@@ -76,37 +76,31 @@ class TestKASPConsistency:
             
             if v3_primers:
                 # Validate primer structure
-                for i, pair in enumerate(v3_primers):
-                    # Check that we have allele-specific and common primers
-                    has_allele_primer = "Allele_" in pair.left.name
-                    has_common_primer = pair.right.name == "Common"
-                    valid_sequences = len(pair.left.sequence) > 0 and len(pair.right.sequence) > 0
-                    valid_product_size = pair.product_size > 0
+                # v3_primers is a list of dictionaries (V2 format)
+                for i, p_dict in enumerate(v3_primers):
+                    index = p_dict.get('index', '')
+                    has_seq = len(p_dict.get('primer_seq', '')) > 0
+                    has_size = p_dict.get('product_size', 0) > 0
+                    tm = p_dict.get('tm', 0.0)
                     
                     results.extend([
                         ComparisonResult(
-                            field_name=f"KASP pair {i+1} has allele-specific primer",
-                            expected_value="allele-specific primer",
-                            actual_value=pair.left.name,
-                            is_match=has_allele_primer
+                            field_name=f"KASP primer {i+1} ({index}) has valid sequence",
+                            expected_value="non-empty sequence",
+                            actual_value=f"length {len(p_dict.get('primer_seq', ''))}",
+                            is_match=has_seq
                         ),
                         ComparisonResult(
-                            field_name=f"KASP pair {i+1} has common primer",
-                            expected_value="Common",
-                            actual_value=pair.right.name,
-                            is_match=has_common_primer
-                        ),
-                        ComparisonResult(
-                            field_name=f"KASP pair {i+1} has valid sequences",
-                            expected_value="non-empty sequences",
-                            actual_value=f"L:{len(pair.left.sequence)} R:{len(pair.right.sequence)}",
-                            is_match=valid_sequences
-                        ),
-                        ComparisonResult(
-                            field_name=f"KASP pair {i+1} has valid product size",
+                            field_name=f"KASP primer {i+1} ({index}) has valid product size",
                             expected_value="> 0",
-                            actual_value=pair.product_size,
-                            is_match=valid_product_size
+                            actual_value=p_dict.get('product_size', 0),
+                            is_match=has_size
+                        ),
+                        ComparisonResult(
+                            field_name=f"KASP primer {i+1} ({index}) has reasonable Tm",
+                            expected_value="50-70",
+                            actual_value=tm,
+                            is_match=50.0 <= tm <= 70.0
                         )
                     ])
                     
@@ -117,7 +111,7 @@ class TestKASPConsistency:
                 actual_value=f"error: {str(e)}",
                 is_match=False
             ))
-        
+                    
         reporter.add_section_results("KASP - Primer Sequences", results)
         
         # Assert all passed
