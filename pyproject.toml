@@ -6,8 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "GPL-2.0"}
 authors = [
-    {name = "Junli Zhang", email = "zhjl86@gmail.com"},
-    {name = "Claude Assistant", email = "claude@anthropic.com"},
+    {name = "lx Gui", email = "ricekent@163.com"},
 ]
 keywords = ["snp", "primer", "kasp", "caps", "pcr", "genotyping", "bioinformatics"]
 classifiers = [

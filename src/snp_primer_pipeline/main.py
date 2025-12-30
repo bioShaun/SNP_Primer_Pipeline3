@@ -179,6 +179,8 @@ def process_snp(
     sequences = {}
     target_sequence = None
     target_snp_position = None
+    genomic_start = None
+    genomic_strand = None
     
     with open(snp_fasta, 'w') as f:
         for region in flanking_regions:
@@ -196,6 +198,8 @@ def process_snp(
             if target_sequence is None:
                 target_sequence = sequence
                 target_snp_position = region.snp_position_in_region - 1
+                genomic_start = region.start
+                genomic_strand = region.strand
     
     if len(sequences) < 2:
         logger.warning(f"Not enough sequences for alignment for SNP {snp.name}")
@@ -249,12 +253,21 @@ def process_snp(
                 alignment if len(sequences) > 1 else None,
                 target_name if len(sequences) > 1 else None,
                 snp_output_dir,
-                diffarray  # Pass diffarray for V2-style filtering
+                diffarray,  # Pass diffarray for V2-style filtering
+                genomic_start=genomic_start,
+                genomic_strand=genomic_strand
             )
             
             # Write KASP results
             kasp_output = snp_output_dir / f"KASP_primers_{snp.name}.txt"
-            kasp_designer.format_output(kasp_primers, snp.name, kasp_output, sites_diff_all)
+            kasp_designer.format_output(
+                kasp_primers, snp.name, kasp_output, sites_diff_all,
+                show_variant_sites=config.show_variant_sites
+            )
+            
+            # Write simplified summary
+            kasp_summary = snp_output_dir / f"KASP_primers_{snp.name}_summary.txt"
+            kasp_designer.format_simple_output(kasp_primers, snp.name, kasp_summary)
             
             logger.info(f"Designed {len(kasp_primers) // 3} KASP primer pairs for {snp.name}")
             
@@ -393,6 +406,12 @@ def main() -> None:
     )
     
     parser.add_argument(
+        "--show-variant-sites",
+        action="store_true",
+        help="Show variant sites in KASP output (default: hidden for cleaner output)"
+    )
+    
+    parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         default="INFO",
@@ -415,7 +434,8 @@ def main() -> None:
         max_tm=args.max_tm,
         max_primer_size=args.max_size,
         pick_anyway=args.pick_anyway,
-        threads=args.threads
+        threads=args.threads,
+        show_variant_sites=args.show_variant_sites
     )
     
     try:

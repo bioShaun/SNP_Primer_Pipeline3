@@ -77,6 +77,8 @@ class KASPDesigner:
         target_name: Optional[str] = None,
         output_dir: Optional[Path] = None,
         external_diffarray: Optional[Dict[int, List[int]]] = None,
+        genomic_start: Optional[int] = None,
+        genomic_strand: Optional[Any] = None,
     ) -> List[Dict[str, Any]]:
         """
         Design KASP primers for a SNP (V2-compatible output).
@@ -103,6 +105,8 @@ class KASPDesigner:
         self._snp_position = snp_position
         self._snp_alleles = snp_alleles
         self._template_sequence = template_sequence
+        self._genomic_start = genomic_start
+        self._genomic_strand = genomic_strand
         
         # Use external diffarray if provided, otherwise build internally
         if external_diffarray is not None:
@@ -538,12 +542,29 @@ class KASPDesigner:
             # V2 counts variation number as number of uppercase chars in formatted seq
             diff_num_from_seq = sum(1 for c in p_seq if c.isupper())
             
+            # Calculate genomic coordinates if available
+            genomic_start_out = None
+            genomic_end_out = None
+            if self._genomic_start is not None:
+                from ..models import Strand
+                # Template coordinates are 0-based, genomic are 1-based
+                if self._genomic_strand == Strand.PLUS:
+                    genomic_start_out = self._genomic_start + primer.start
+                    genomic_end_out = self._genomic_start + primer.end
+                else:  # MINUS strand
+                    # On minus strand, coordinates are reversed
+                    template_length = len(self._template_sequence)
+                    genomic_start_out = self._genomic_start + (template_length - primer.end - 1)
+                    genomic_end_out = self._genomic_start + (template_length - primer.start - 1)
+            
             results.append({
                 'index': f"{key}-{suffix}",
                 'product_size': pp.product_size,
                 'direction': direction,
                 'start': start_out,
                 'end': end_out,
+                'genomic_start': genomic_start_out,
+                'genomic_end': genomic_end_out,
                 'diff_num': diff_num_from_seq,  # Count of uppercase chars = variant sites
                 'diff_three_all': "YES" if primer.diff_three_all else "NO",
                 'length': primer.length,
@@ -576,7 +597,8 @@ class KASPDesigner:
         kasp_results: List[Dict[str, Any]],
         snp_name: str,
         output_file: Path,
-        variant_sites: Optional[List[int]] = None
+        variant_sites: Optional[List[int]] = None,
+        show_variant_sites: bool = False
     ) -> None:
         """
         Format and write KASP primer results to file (V2 compatible format).
@@ -595,6 +617,7 @@ class KASPDesigner:
                 # Write header (V2 format)
                 header = [
                     "index", "product_size", "type", "start", "end", 
+                    "genomic_start", "genomic_end",
                     "variation number", "3'diffall", "length", "Tm", 
                     "GCcontent", "any", "3'", "end_stability", "hairpin", 
                     "primer_seq", "ReverseComplement", "penalty", 
@@ -610,6 +633,8 @@ class KASPDesigner:
                         result['direction'],
                         str(result['start']),
                         str(result['end']),
+                        str(result['genomic_start']) if result['genomic_start'] is not None else "NA",
+                        str(result['genomic_end']) if result['genomic_end'] is not None else "NA",
                         str(result['diff_num']),
                         result['diff_three_all'],
                         str(result['length']),
@@ -628,14 +653,70 @@ class KASPDesigner:
                     ])
                     f.write(line + "\n")
                 
-                # Write variant sites information (V2 format)
-                if variant_sites:
+                # Write variant sites information (V2 format) - optional
+                if show_variant_sites and variant_sites:
                     f.write(f"\n\nSites that can differ all for {snp_name}\n")
                     f.write(", ".join(str(x + 1) for x in variant_sites))  # Convert to 1-based
                     f.write("\n\n\n")
                     
         except IOError as e:
             raise PrimerDesignError(f"Failed to write output file: {e}") from e
+    
+    def format_simple_output(
+        self,
+        kasp_results: List[Dict[str, Any]],
+        snp_name: str,
+        output_file: Path
+    ) -> None:
+        """
+        Format and write simplified KASP primer summary (one line per primer set).
+        
+        Args:
+            kasp_results: List of KASP primer dictionaries from design_primers
+            snp_name: SNP identifier
+            output_file: Output file path
+        """
+        try:
+            with open(output_file, 'w') as f:
+                # Write header
+                header = [
+                    "Index", "Allele_A", "Allele_B", "Common",
+                    "Product_Size", "Genomic_Range", "Score"
+                ]
+                f.write("\t".join(header) + "\n")
+                
+                # Group results by primer set (every 3 consecutive entries)
+                for i in range(0, len(kasp_results), 3):
+                    if i + 2 >= len(kasp_results):
+                        break  # Incomplete set
+                    
+                    allele_a = kasp_results[i]
+                    allele_b = kasp_results[i + 1]
+                    common = kasp_results[i + 2]
+                    
+                    # Extract base index (remove -Allele-X/-Common suffix)
+                    base_index = allele_a['index'].rsplit('-', 2)[0]
+                    
+                    # Format genomic range
+                    if allele_a['genomic_start'] is not None:
+                        genomic_range = f"{allele_a['genomic_start']}-{common['genomic_end']}"
+                    else:
+                        genomic_range = "NA"
+                    
+                    # Write single-line summary
+                    line = "\t".join([
+                        f"{snp_name}-{base_index}",
+                        allele_a['primer_seq'],
+                        allele_b['primer_seq'],
+                        common['primer_seq'],
+                        str(allele_a['product_size']),
+                        genomic_range,
+                        f"{allele_a['score']:.2f}" if isinstance(allele_a['score'], float) else str(allele_a['score'])
+                    ])
+                    f.write(line + "\n")
+                    
+        except IOError as e:
+            raise PrimerDesignError(f"Failed to write simple output file: {e}") from e
     
     def _format_primer_line(
         self,

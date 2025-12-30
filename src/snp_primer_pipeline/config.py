@@ -31,6 +31,7 @@ class PipelineConfig:
     max_hits: int = 6
     primer_product_size_range: Tuple[int, int] = (50, 250)
     log_level: str = "INFO"
+    show_variant_sites: bool = False  # Hide variant sites by default for cleaner output
     
     def __post_init__(self):
         """Validate configuration after initialization."""
