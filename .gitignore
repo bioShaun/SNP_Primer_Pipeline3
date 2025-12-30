@@ -136,3 +136,4 @@ output/
 config.yaml
 getkasp.xml
 output
+test_data/v3_test_output
