@@ -76,6 +76,7 @@ class KASPDesigner:
         alignment: Optional[MultipleSequenceAlignment] = None,
         target_name: Optional[str] = None,
         output_dir: Optional[Path] = None,
+        external_diffarray: Optional[Dict[int, List[int]]] = None,
     ) -> List[Dict[str, Any]]:
         """
         Design KASP primers for a SNP (V2-compatible output).
@@ -89,6 +90,7 @@ class KASPDesigner:
             alignment: Multiple sequence alignment for specificity checking
             target_name: Name of target sequence in alignment
             output_dir: Output directory for intermediate files
+            external_diffarray: Pre-computed diffarray from find_variant_sites_v2
             
         Returns:
             List of KASP primer dictionaries (V2-compatible format)
@@ -102,8 +104,10 @@ class KASPDesigner:
         self._snp_alleles = snp_alleles
         self._template_sequence = template_sequence
         
-        # Build diffarray from alignment if available (V2 compatibility)
-        if alignment and target_name:
+        # Use external diffarray if provided, otherwise build internally
+        if external_diffarray is not None:
+            self.diffarray = external_diffarray
+        elif alignment and target_name:
             self._build_diffarray(alignment, target_name, snp_position)
         
         # Determine which allele to use as template (prefer A/T for lower Tm)
@@ -531,13 +535,16 @@ class KASPDesigner:
                 start_out = primer.end + 1   # 5' end (higher position) 
                 end_out = primer.start + 1   # 3' end (lower position)
             
+            # V2 counts variation number as number of uppercase chars in formatted seq
+            diff_num_from_seq = sum(1 for c in p_seq if c.isupper())
+            
             results.append({
                 'index': f"{key}-{suffix}",
                 'product_size': pp.product_size,
                 'direction': direction,
                 'start': start_out,
                 'end': end_out,
-                'diff_num': primer.diff_num,
+                'diff_num': diff_num_from_seq,  # Count of uppercase chars = variant sites
                 'diff_three_all': "YES" if primer.diff_three_all else "NO",
                 'length': primer.length,
                 'tm': primer.tm,
@@ -557,9 +564,12 @@ class KASPDesigner:
         return results
     
     def _reverse_complement(self, seq: str) -> str:
-        """Get reverse complement of DNA sequence."""
-        complement = {"A": "T", "T": "A", "G": "C", "C": "G"}
-        return "".join(complement.get(base, base) for base in reversed(seq.upper()))
+        """Get reverse complement of DNA sequence, preserving case."""
+        complement = {
+            "A": "T", "T": "A", "G": "C", "C": "G",
+            "a": "t", "t": "a", "g": "c", "c": "g"
+        }
+        return "".join(complement.get(base, base) for base in reversed(seq))
     
     def format_output(
         self,

@@ -14,7 +14,137 @@ from dataclasses import dataclass
 from ..exceptions import AlignmentError
 
 
+# V2-compatible helper functions
+def _tm_simple(seq: str) -> int:
+    """Simple Tm calculator (V2 style)."""
+    t = 0
+    for a in seq.upper():
+        if a in 'AT':
+            t += 2
+        if a in 'CG':
+            t += 4
+    return t
+
+
+def _find_longest_substring(s1: str, s2: str) -> tuple:
+    """
+    Find the segment with largest Tm (V2 style).
+    Returns: (longestStart, longestEnd, nL, nR)
+    """
+    longest_start = 0
+    longest_end = 0
+    largest_tm = 0
+    start = 0
+    
+    gaps = [i for i, c in enumerate(s1) if c == '-' or s2[i] == '-']
+    gaps.append(len(s1))
+    
+    for gap in gaps:
+        end = gap
+        tm = _tm_simple(s1[start:end])
+        if tm > largest_tm:
+            longest_start = start
+            longest_end = end
+            largest_tm = tm
+        start = gap + 1
+    
+    n_left = len(s1[:longest_start].replace("-", ""))
+    n_right = len(s1[longest_end:].replace("-", ""))
+    return longest_start, longest_end, n_left, n_right
+
+
+def _score_pairwise(seq1: str, seq2: str, gapopen: float = -4.0, 
+                    gapext: float = -1.0, match: float = 1.0, 
+                    mismatch: float = -1.0) -> float:
+    """Alignment score (V2 style)."""
+    score = 0.0
+    gap = False
+    
+    for i in range(len(seq1)):
+        pair = (seq1[i], seq2[i])
+        if not gap:
+            if '-' in pair:
+                gap = True
+                score += gapopen
+            elif seq1[i] == seq2[i]:
+                score += match
+            else:
+                score += mismatch
+        else:
+            if '-' not in pair:
+                gap = False
+                if seq1[i] == seq2[i]:
+                    score += match
+                else:
+                    score += mismatch
+            else:
+                score += gapext
+    return score
+
+
+def _gap_diff(seq1: str, seq2: str) -> int:
+    """Count gap differences for an alignment (V2 style)."""
+    ngap = 0
+    for i in range(len(seq1)):
+        pair = seq1[i] + seq2[i]
+        if pair.count("-") == 1:
+            ngap += 1
+    return ngap
+
+
+def _get_homeo_seq(fasta: dict, target: str, ids: list, 
+                   align_left: int, align_right: int) -> list:
+    """
+    Get the list of sequences in the homeolog groups for comparison (V2 style).
+    
+    Args:
+        fasta: Dictionary of sequence name -> aligned sequence
+        target: Target sequence name
+        ids: List of other sequence names
+        align_left: Left alignment position
+        align_right: Right alignment position
+        
+    Returns:
+        List of sequences for comparison (one per homeolog)
+    """
+    s1 = fasta[target]
+    seq2comp = []
+    
+    for k in ids:
+        s2 = fasta[k]
+        target_seq = s1[align_left:(align_right + 1)]
+        homeo_seq = s2[align_left:(align_right + 1)]
+        score1 = _score_pairwise(target_seq, homeo_seq)
+        
+        # Get the sequences for comparison
+        index_l, index_r, n_left, n_right = _find_longest_substring(target_seq, homeo_seq)
+        index_l += align_left
+        index_r += align_left
+        
+        seq_l = s2[:index_l].replace("-", "")
+        seq_r = s2[index_r:].replace("-", "")
+        
+        # Handle case where not enough bases available
+        if len(seq_l) < n_left:
+            seq_l = "-" * (n_left - len(seq_l)) + seq_l
+        if len(seq_r) < n_right:
+            seq_r = seq_r + "-" * (n_right - len(seq_r))
+        
+        seqk = seq_l[::-1][:n_left][::-1] + s2[index_l:index_r] + seq_r[:n_right]
+        
+        score2 = _score_pairwise(target_seq.replace("-", ""), seqk)
+        
+        # If score in alignment is better and gaps < 4, use gap-removed version
+        if score1 > score2 and _gap_diff(target_seq, homeo_seq) < 4:
+            seqk = "".join([homeo_seq[i] for i, c in enumerate(target_seq) if c != '-'])
+        
+        seq2comp.append(seqk)
+    
+    return seq2comp
+
+
 @dataclass
+
 class AlignedSequence:
     """Aligned sequence with gap information."""
     
@@ -221,6 +351,136 @@ class MultipleSequenceAlignment:
                     sites_diff_all.append(pos_template)
         
         return sorted(sites_diff_all), sorted(sites_diff_any)
+    
+    def find_variant_sites_v2(
+        self,
+        target_name: str,
+        snp_position: int,
+    ) -> Tuple[List[int], List[int], Dict[int, List[int]]]:
+        """
+        Find variant sites using exact V2 logic with get_homeo_seq.
+        
+        This method implements V2's exact algorithm that uses 20bp window
+        comparison around each position relative to the SNP position.
+        
+        Args:
+            target_name: Name of target sequence
+            snp_position: SNP position in template (0-based)
+            
+        Returns:
+            Tuple of (sites_diff_all, sites_diff_any, diffarray):
+            - sites_diff_all: Template positions differing from ALL homeologs
+            - sites_diff_any: Template positions differing from ANY homeolog
+            - diffarray: Dict mapping template pos -> list of 0/1 for each homeolog
+        """
+        # Build fasta dictionary for get_homeo_seq
+        fasta = {}
+        target = None
+        ids = []
+        
+        for seq in self.sequences:
+            fasta[seq.name] = seq.sequence
+            if seq.name == target_name:
+                target = seq.name
+            else:
+                ids.append(seq.name)
+        
+        if target is None:
+            raise AlignmentError(f"Target sequence '{target_name}' not found")
+        
+        if not ids:
+            return [], [], {}
+        
+        target_seq_obj = self.get_sequence_by_name(target_name)
+        seq_template = target_seq_obj.clean_sequence
+        template_length = len(seq_template)
+        
+        # Build t2a and a2t mappings
+        t2a = {}
+        a2t = {}
+        template_pos = 0
+        for align_pos, char in enumerate(target_seq_obj.sequence):
+            if char != "-":
+                t2a[template_pos] = align_pos
+                a2t[align_pos] = template_pos
+                template_pos += 1
+        
+        # Calculate gap boundaries (V2 style)
+        gap_left = max([len(seq.sequence) - len(seq.sequence.lstrip('-')) 
+                       for seq in self.sequences])
+        gap_right = min([len(seq.sequence.rstrip('-')) for seq in self.sequences])
+        
+        variation = []  # Sites that differ from ALL
+        variation2 = []  # Sites that differ from at least 1
+        diffarray = {}
+        
+        # V2-style loop through alignment positions
+        for i in range(gap_left, gap_right):
+            b1 = fasta[target][i]
+            
+            if b1 == "-":
+                continue
+            
+            pos_template = a2t.get(i)
+            if pos_template is None:
+                continue
+            
+            # V2 boundary check
+            if pos_template < 20 or pos_template > template_length - 20:
+                continue
+            
+            nd = 0  # number of differences
+            da = [0] * len(ids)  # differ array
+            
+            # Calculate alignment range for get_homeo_seq (V2 style)
+            if pos_template < snp_position:
+                # 20 bp left of current position
+                left_pos = pos_template - 19
+                if left_pos < 0:
+                    left_pos = 0
+                if left_pos not in t2a:
+                    continue
+                align_left = t2a[left_pos]
+                align_right = i
+            else:
+                # 20 bp right of current position
+                right_pos = pos_template + 19
+                if right_pos >= template_length:
+                    right_pos = template_length - 1
+                if right_pos not in t2a:
+                    continue
+                align_left = i
+                align_right = t2a[right_pos]
+            
+            # Get homeolog sequences for comparison
+            seq2comp = _get_homeo_seq(fasta, target, ids, align_left, align_right)
+            
+            # Compare bases (V2 style)
+            for m, k in enumerate(seq2comp):
+                if pos_template < snp_position:
+                    b2 = k[-1] if k else '-'  # Last base of extracted sequence
+                else:
+                    b2 = k[0] if k else '-'   # First base of extracted sequence
+                
+                if b1 != b2:
+                    nd += 1
+                    da[m] = 1
+            
+            # Store in diffarray
+            diffarray[pos_template] = da
+            
+            # Check if differs from all
+            if nd == len(ids):
+                if pos_template not in variation:
+                    variation.append(pos_template)
+            
+            # Check if differs from any
+            if nd > 0:
+                if pos_template not in variation2:
+                    variation2.append(pos_template)
+        
+        return sorted(variation), sorted(variation2), diffarray
+
     
     def _is_gap_free_region(
         self,

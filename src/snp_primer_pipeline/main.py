@@ -215,7 +215,11 @@ def process_snp(
         # Find variant sites
         target_name = list(sequences.keys())[0]
         alignment.set_target_sequence(target_name)
-        sites_diff_all, sites_diff_any = alignment.find_variant_sites(target_name)
+        
+        # Use V2-style variant site detection with SNP position awareness
+        sites_diff_all, sites_diff_any, diffarray = alignment.find_variant_sites_v2(
+            target_name, target_snp_position
+        )
         
         logger.info(f"Found {len(sites_diff_all)} sites that differ from all homeologs")
         
@@ -223,6 +227,7 @@ def process_snp(
         logger.warning(f"Alignment failed for SNP {snp.name}: {e}")
         sites_diff_all = []
         sites_diff_any = []
+        diffarray = {}
     
     # Design KASP primers
     if config.design_kasp:
@@ -243,7 +248,8 @@ def process_snp(
                 sites_diff_all,
                 alignment if len(sequences) > 1 else None,
                 target_name if len(sequences) > 1 else None,
-                snp_output_dir
+                snp_output_dir,
+                diffarray  # Pass diffarray for V2-style filtering
             )
             
             # Write KASP results
