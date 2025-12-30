@@ -1,1 +1,0 @@
-index	product_size	type	start	end	variation_number	3'diffall	length	Tm	GC_content	any	3'	end_stability	hairpin	primer_seq	reverse_complement	penalty	compl_any	compl_end	score
