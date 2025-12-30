@@ -258,12 +258,6 @@ For users of SNP_Primer_Pipeline2:
 
 This project is licensed under the GNU General Public License v2.0 - see the original SNP_Primer_Pipeline2 for details.
 
-## Citation
-
-If you use this pipeline in your research, please cite:
-
-> Zhang, J. et al. SNP Primer Pipeline: A modern Python pipeline for designing KASP and CAPS primers for SNP genotyping.
-
 ## Contributing
 
 Contributions are welcome! Please:
