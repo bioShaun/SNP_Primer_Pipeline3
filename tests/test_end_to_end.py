@@ -2,7 +2,7 @@
 """
 End-to-end integration tests for SNP Primer Pipeline.
 
-Tests the complete pipeline using example data from SNP_Primer_Pipeline2.
+Tests the complete pipeline using example data.
 """
 
 import pytest

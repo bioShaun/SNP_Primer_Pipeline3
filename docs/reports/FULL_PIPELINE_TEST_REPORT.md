@@ -6,9 +6,9 @@ This report documents the full pipeline test that runs V3 from scratch using V2'
 
 ## Test Configuration
 
-- **Input file**: `SNP_Primer_Pipeline2/examples/polymarker_input_example.csv`
-- **Reference DB**: `SNP_Primer_Pipeline2/examples/blastdb/test_reference.fa`
-- **V2 Reference output**: `SNP_Primer_Pipeline2/examples/Potential_KASP_primers.tsv`
+- **Input file**: `test_data/v2_examples/polymarker_input_example.csv`
+- **Reference DB**: `test_data/v2_examples/blastdb/test_reference.fa`
+- **V2 Reference output**: `test_data/v2_examples/Potential_KASP_primers.tsv`
 
 ## Test Results
 

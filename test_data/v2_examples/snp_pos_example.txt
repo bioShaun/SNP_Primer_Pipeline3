@@ -1,0 +1,2 @@
+chr7A	7659	T	C
+chr7A	7716	A	G

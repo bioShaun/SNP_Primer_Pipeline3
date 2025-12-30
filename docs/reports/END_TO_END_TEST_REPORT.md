@@ -10,7 +10,7 @@ V3 successfully generates KASP primers that match V2's output when using V2's in
 
 ## Test Configuration
 
-- **Input Data**: V2 example files from `SNP_Primer_Pipeline2/examples/`
+- **Input Data**: V2 example files from `test_data/v2_examples/`
 - **SNPs Tested**: 2 (chr7A-7659, chr7A-7716)
 - **V2 Reference**: `Potential_KASP_primers.tsv`
 

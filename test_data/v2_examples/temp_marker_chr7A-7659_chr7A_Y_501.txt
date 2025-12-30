@@ -1,0 +1,3 @@
+chr7A 7159-8159 plus
+chr7D 6432-7432 plus
+chr7B 6138-7138 plus

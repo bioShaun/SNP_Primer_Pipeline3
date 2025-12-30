@@ -1,0 +1,6 @@
+chr7A-7659_chr7A_Y_501	chr7A	7159-8159	plus
+chr7A-7659_chr7A_Y_501	chr7D	6432-7432	plus
+chr7A-7659_chr7A_Y_501	chr7B	6138-7138	plus
+chr7A-7716_chr7A_R_501	chr7A	7216-8216	plus
+chr7A-7716_chr7A_R_501	chr7B	6195-7195	plus
+chr7A-7716_chr7A_R_501	chr7D	6486-7486	plus

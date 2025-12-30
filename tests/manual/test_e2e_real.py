@@ -19,8 +19,8 @@ from dataclasses import dataclass
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 # V2 examples directory
-V2_EXAMPLES = Path(__file__).parent.parent / "SNP_Primer_Pipeline2" / "examples"
-V2_BIN = Path(__file__).parent.parent / "SNP_Primer_Pipeline2" / "bin"
+V2_EXAMPLES = Path(__file__).parent.parent.parent / "test_data" / "v2_examples"
+V2_BIN = Path(__file__).parent.parent.parent / "bin"
 
 
 @dataclass

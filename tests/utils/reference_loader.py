@@ -2,7 +2,7 @@
 """
 Reference data loader for consistency tests.
 
-Loads reference output data from SNP_Primer_Pipeline2/examples directory.
+Loads reference output data from test_data/v2_examples directory.
 """
 
 from pathlib import Path
@@ -82,7 +82,7 @@ class BlastHitRecord:
 
 
 class ReferenceDataLoader:
-    """Loads reference data from SNP_Primer_Pipeline2/examples."""
+    """Loads reference data from test_data/v2_examples."""
     
     def __init__(self, examples_dir: Path):
         self.examples_dir = Path(examples_dir)

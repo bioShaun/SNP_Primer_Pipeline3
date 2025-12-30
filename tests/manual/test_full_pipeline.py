@@ -23,7 +23,7 @@ from dataclasses import dataclass
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 # V2 examples directory
-V2_EXAMPLES = Path(__file__).parent.parent / "SNP_Primer_Pipeline2" / "examples"
+V2_EXAMPLES = Path(__file__).parent.parent.parent / "test_data" / "v2_examples"
 
 
 @dataclass
@@ -160,7 +160,7 @@ def run_v3_full_pipeline(input_file: Path, reference_db: Path, output_dir: Path)
         blast_output = output_dir / "blast_out.txt"
         
         # Use V2's BLAST output for consistency testing
-        v2_blast_output = Path(__file__).parent.parent / "SNP_Primer_Pipeline2" / "examples" / "blast_out.txt"
+        v2_blast_output = Path(__file__).parent.parent.parent / "test_data" / "v2_examples" / "blast_out.txt"
         if v2_blast_output.exists():
             import shutil
             shutil.copy(v2_blast_output, blast_output)

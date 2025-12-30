@@ -1,0 +1,126 @@
+index	product_size	type	start	end	diff_number	3'differall	length	Tm	GCcontent	any	3'	end_stability	hairpin	primer_seq	ReverseComplement	penalty	compl_any	compl_end
+chr7A-7659-dCAPS-ApoI,68-raatty-538-500-0	85	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	9.464597	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-538-500-0	85	RIGHT	561	538	2	YES	24	59.243	41.667	0.0	0.0	3.34	0.0	agcTgatctttgttgttgagtacC	GgtactcaacaacaaagatcAgct	9.464597	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-573-500-0	116	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	5.533288	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-573-500-0	116	RIGHT	592	573	4	YES	20	60.826	55.0	0.0	0.0	5.8	0.0	tgTttgttgtgCtaggggGC	GCcccctaGcacaacaaAca	5.533288	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-574-500-0	117	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.405954	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-574-500-0	117	RIGHT	593	574	4	YES	20	58.301	50.0	0.0	0.0	5.4	0.0	TtgTttgttgtgCtaggggG	CcccctaGcacaacaaAcaA	6.405954	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-633-500-0	178	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.802096	0.68	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-633-500-0	178	RIGHT	654	633	2	YES	22	60.095	54.545	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtAC	GTacacacaggtggtctagagc	6.802096	0.68	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-634-500-0	178	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.875943	0.68	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-634-500-0	178	RIGHT	654	634	1	YES	21	58.832	52.381	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtA	Tacacacaggtggtctagagc	6.875943	0.68	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-661-500-0	208	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	10.577027	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-661-500-0	208	RIGHT	684	661	1	YES	24	58.13	41.667	0.0	0.0	2.52	0.0	tgccctaaatgatacctgagattC	Gaatctcaggtatcatttagggca	10.577027	0.00	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-724-500-0	267	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.642036	3.28	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-724-500-0	267	RIGHT	743	724	2	YES	20	58.065	50.0	0.0	0.0	5.34	0.0	tccgaactTgatatggcgtG	CacgccatatcAagttcgga	6.642036	3.28	0.00
+chr7A-7659-dCAPS-ApoI,68-raatty-735-500-0	279	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	7.208709	12.33	5.35
+chr7A-7659-dCAPS-ApoI,68-raatty-735-500-0	279	RIGHT	755	735	1	YES	21	58.499	47.619	0.0	0.0	2.66	36.7	gctaagggtgtttccgaactT	Aagttcggaaacacccttagc	7.208709	12.33	5.35
+chr7A-7659-dCAPS-MluCI,63-aatt-538-500-0	85	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	9.464597	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-538-500-0	85	RIGHT	561	538	2	YES	24	59.243	41.667	0.0	0.0	3.34	0.0	agcTgatctttgttgttgagtacC	GgtactcaacaacaaagatcAgct	9.464597	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-573-500-0	116	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	5.533288	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-573-500-0	116	RIGHT	592	573	4	YES	20	60.826	55.0	0.0	0.0	5.8	0.0	tgTttgttgtgCtaggggGC	GCcccctaGcacaacaaAca	5.533288	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-574-500-0	117	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.405954	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-574-500-0	117	RIGHT	593	574	4	YES	20	58.301	50.0	0.0	0.0	5.4	0.0	TtgTttgttgtgCtaggggG	CcccctaGcacaacaaAcaA	6.405954	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-633-500-0	178	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.802096	0.68	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-633-500-0	178	RIGHT	654	633	2	YES	22	60.095	54.545	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtAC	GTacacacaggtggtctagagc	6.802096	0.68	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-634-500-0	178	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.875943	0.68	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-634-500-0	178	RIGHT	654	634	1	YES	21	58.832	52.381	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtA	Tacacacaggtggtctagagc	6.875943	0.68	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-661-500-0	208	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	10.577027	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-661-500-0	208	RIGHT	684	661	1	YES	24	58.13	41.667	0.0	0.0	2.52	0.0	tgccctaaatgatacctgagattC	Gaatctcaggtatcatttagggca	10.577027	0.00	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-724-500-0	267	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	6.642036	3.28	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-724-500-0	267	RIGHT	743	724	2	YES	20	58.065	50.0	0.0	0.0	5.34	0.0	tccgaactTgatatggcgtG	CacgccatatcAagttcgga	6.642036	3.28	0.00
+chr7A-7659-dCAPS-MluCI,63-aatt-735-500-0	279	LEFT	477	500	0	YES	24	59.293	37.5	2.92	0.0	2.44	42.84	tgggactagttcaaaactgcaaAa	tTttgcagttttgaactagtccca	7.208709	12.33	5.35
+chr7A-7659-dCAPS-MluCI,63-aatt-735-500-0	279	RIGHT	755	735	1	YES	21	58.499	47.619	0.0	0.0	2.66	36.7	gctaagggtgtttccgaactT	Aagttcggaaacacccttagc	7.208709	12.33	5.35
+chr7A-7659-dCAPS-DdeI,66-ctnag-238-503-0	312	LEFT	216	238	8	YES	23	58.965	43.478	0.0	0.0	4.18	0.0	tcCtacttCATtGTtaCcccgaT	AtcgggGtaACaATGaagtaGga	11.739690	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-238-503-0	312	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	11.739690	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-243-503-0	308	LEFT	220	243	8	YES	24	57.247	37.5	0.0	0.0	1.85	0.0	acttCATtGTtaCcccgaTtaaaG	CtttaAtcgggGtaACaATGaagt	14.457686	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-243-503-0	308	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	14.457686	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-245-503-0	307	LEFT	221	245	9	YES	25	57.614	36.0	0.0	0.0	2.52	0.0	cttCATtGTtaCcccgaTtaaaGaA	TtCtttaAtcgggGtaACaATGaag	15.090356	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-245-503-0	307	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	15.090356	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-246-503-0	306	LEFT	222	246	10	YES	25	57.052	32.0	0.0	0.0	2.4	0.0	ttCATtGTtaCcccgaTtaaaGaAT	ATtCtttaAtcgggGtaACaATGaa	15.652613	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-246-503-0	306	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	15.652613	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-257-503-0	295	LEFT	233	257	5	YES	25	57.289	40.0	0.0	0.0	3.01	0.0	cccgaTtaaaGaATaccagtacttC	GaagtactggtATtCtttaAtcggg	15.415344	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-257-503-0	295	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	15.415344	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-321-503-0	230	LEFT	298	321	4	YES	24	59.3	41.667	0.0	0.0	2.32	0.0	acttCACcaggttatcggaaaatG	CattttccgataacctgGTGaagt	12.404791	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-321-503-0	230	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	12.404791	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-322-503-0	227	LEFT	301	322	5	YES	22	58.986	45.455	0.0	0.0	3.56	0.0	tCACcaggttatcggaaaatGC	GCattttccgataacctgGTGa	10.718499	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-322-503-0	227	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	10.718499	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-352-503-0	194	LEFT	334	352	3	YES	19	61.346	63.158	0.0	0.0	4.4	43.04	cccaaggGatgcacAgcaC	GtgcTgtgcatCccttggg	10.050339	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-352-503-0	194	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	10.050339	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-356-503-0	191	LEFT	337	356	4	YES	20	59.308	50.0	2.38	0.0	2.74	43.04	aaggGatgcacAgcaCtgtA	TacaGtgcTgtgcatCcctt	8.397054	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-356-503-0	191	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	8.397054	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-362-503-0	185	LEFT	343	362	4	YES	20	57.731	45.0	2.38	0.0	3.13	42.83	tgcacAgcaCtgtAtggaaA	TttccaTacaGtgcTgtgca	9.973340	12.21	2.36
+chr7A-7659-dCAPS-DdeI,66-ctnag-362-503-0	185	RIGHT	527	503	1	YES	25	57.295	40.0	0.0	0.0	1.82	0.0	gtattGctacctctgatccataCta	taGtatggatcagaggtagCaatac	9.973340	12.21	2.36
+chr7A-7659-dCAPS-DdeI,66-ctnag-238-504-0	313	LEFT	216	238	8	YES	23	58.965	43.478	0.0	0.0	4.18	0.0	tcCtacttCATtGTtaCcccgaT	AtcgggGtaACaATGaagtaGga	10.113105	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-238-504-0	313	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	10.113105	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-243-504-0	309	LEFT	220	243	8	YES	24	57.247	37.5	0.0	0.0	1.85	0.0	acttCATtGTtaCcccgaTtaaaG	CtttaAtcgggGtaACaATGaagt	12.831100	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-243-504-0	309	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	12.831100	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-245-504-0	308	LEFT	221	245	9	YES	25	57.614	36.0	0.0	0.0	2.52	0.0	cttCATtGTtaCcccgaTtaaaGaA	TtCtttaAtcgggGtaACaATGaag	13.463771	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-245-504-0	308	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	13.463771	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-246-504-0	307	LEFT	222	246	10	YES	25	57.052	32.0	0.0	0.0	2.4	0.0	ttCATtGTtaCcccgaTtaaaGaAT	ATtCtttaAtcgggGtaACaATGaa	14.026027	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-246-504-0	307	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	14.026027	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-257-504-0	296	LEFT	233	257	5	YES	25	57.289	40.0	0.0	0.0	3.01	0.0	cccgaTtaaaGaATaccagtacttC	GaagtactggtATtCtttaAtcggg	13.788759	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-257-504-0	296	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	13.788759	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-321-504-0	231	LEFT	298	321	4	YES	24	59.3	41.667	0.0	0.0	2.32	0.0	acttCACcaggttatcggaaaatG	CattttccgataacctgGTGaagt	10.778206	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-321-504-0	231	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	10.778206	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-322-504-0	228	LEFT	301	322	5	YES	22	58.986	45.455	0.0	0.0	3.56	0.0	tCACcaggttatcggaaaatGC	GCattttccgataacctgGTGa	9.091914	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-322-504-0	228	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	9.091914	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-352-504-0	195	LEFT	334	352	3	YES	19	61.346	63.158	0.0	0.0	4.4	43.04	cccaaggGatgcacAgcaC	GtgcTgtgcatCccttggg	8.423753	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-352-504-0	195	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	8.423753	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-356-504-0	192	LEFT	337	356	4	YES	20	59.308	50.0	2.38	0.0	2.74	43.04	aaggGatgcacAgcaCtgtA	TacaGtgcTgtgcatCcctt	6.770469	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-356-504-0	192	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	6.770469	0.00	0.00
+chr7A-7659-dCAPS-DdeI,66-ctnag-362-504-0	186	LEFT	343	362	4	YES	20	57.731	45.0	2.38	0.0	3.13	42.83	tgcacAgcaCtgtAtggaaA	TttccaTacaGtgcTgtgca	8.346755	12.21	2.36
+chr7A-7659-dCAPS-DdeI,66-ctnag-362-504-0	186	RIGHT	528	504	1	YES	25	58.922	40.0	0.0	0.0	2.12	0.0	tgtattGctacctctgatccataCt	aGtatggatcagaggtagCaataca	8.346755	12.21	2.36
+chr7A-7659-dCAPS-SspI,68-aatatt-538-500-0	85	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	10.383291	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-538-500-0	85	RIGHT	561	538	2	YES	24	59.243	41.667	0.0	0.0	3.34	0.0	agcTgatctttgttgttgagtacC	GgtactcaacaacaaagatcAgct	10.383291	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-573-500-0	116	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	6.451982	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-573-500-0	116	RIGHT	592	573	4	YES	20	60.826	55.0	0.0	0.0	5.8	0.0	tgTttgttgtgCtaggggGC	GCcccctaGcacaacaaAca	6.451982	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-574-500-0	117	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	7.324648	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-574-500-0	117	RIGHT	593	574	4	YES	20	58.301	50.0	0.0	0.0	5.4	0.0	TtgTttgttgtgCtaggggG	CcccctaGcacaacaaAcaA	7.324648	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-633-500-0	178	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	7.720791	0.68	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-633-500-0	178	RIGHT	654	633	2	YES	22	60.095	54.545	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtAC	GTacacacaggtggtctagagc	7.720791	0.68	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-634-500-0	178	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	7.794638	0.68	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-634-500-0	178	RIGHT	654	634	1	YES	21	58.832	52.381	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtA	Tacacacaggtggtctagagc	7.794638	0.68	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-661-500-0	208	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	11.495721	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-661-500-0	208	RIGHT	684	661	1	YES	24	58.13	41.667	0.0	0.0	2.52	0.0	tgccctaaatgatacctgagattC	Gaatctcaggtatcatttagggca	11.495721	0.00	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-724-500-0	267	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	7.560731	3.28	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-724-500-0	267	RIGHT	743	724	2	YES	20	58.065	50.0	0.0	0.0	5.34	0.0	tccgaactTgatatggcgtG	CacgccatatcAagttcgga	7.560731	3.28	0.00
+chr7A-7659-dCAPS-SspI,68-aatatt-735-500-0	279	LEFT	477	500	0	YES	24	58.374	37.5	2.92	0.0	1.9	42.84	tgggactagttcaaaactgcaaTa	tAttgcagttttgaactagtccca	8.127404	12.33	5.35
+chr7A-7659-dCAPS-SspI,68-aatatt-735-500-0	279	RIGHT	755	735	1	YES	21	58.499	47.619	0.0	0.0	2.66	36.7	gctaagggtgtttccgaactT	Aagttcggaaacacccttagc	8.127404	12.33	5.35
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-238-502-0	310	LEFT	216	238	8	YES	23	58.965	43.478	0.0	0.0	4.18	0.0	tcCtacttCATtGTtaCcccgaT	AtcgggGtaACaATGaagtaGga	10.727961	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-238-502-0	310	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	10.727961	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-243-502-0	306	LEFT	220	243	8	YES	24	57.247	37.5	0.0	0.0	1.85	0.0	acttCATtGTtaCcccgaTtaaaG	CtttaAtcgggGtaACaATGaagt	13.445956	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-243-502-0	306	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	13.445956	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-245-502-0	305	LEFT	221	245	9	YES	25	57.614	36.0	0.0	0.0	2.52	0.0	cttCATtGTtaCcccgaTtaaaGaA	TtCtttaAtcgggGtaACaATGaag	14.078627	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-245-502-0	305	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	14.078627	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-246-502-0	304	LEFT	222	246	10	YES	25	57.052	32.0	0.0	0.0	2.4	0.0	ttCATtGTtaCcccgaTtaaaGaAT	ATtCtttaAtcgggGtaACaATGaa	14.640883	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-246-502-0	304	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	14.640883	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-257-502-0	293	LEFT	233	257	5	YES	25	57.289	40.0	0.0	0.0	3.01	0.0	cccgaTtaaaGaATaccagtacttC	GaagtactggtATtCtttaAtcggg	14.403615	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-257-502-0	293	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	14.403615	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-321-502-0	228	LEFT	298	321	4	YES	24	59.3	41.667	0.0	0.0	2.32	0.0	acttCACcaggttatcggaaaatG	CattttccgataacctgGTGaagt	11.393062	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-321-502-0	228	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	11.393062	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-322-502-0	225	LEFT	301	322	5	YES	22	58.986	45.455	0.0	0.0	3.56	0.0	tCACcaggttatcggaaaatGC	GCattttccgataacctgGTGa	9.706770	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-322-502-0	225	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	9.706770	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-352-502-0	192	LEFT	334	352	3	YES	19	61.346	63.158	0.0	0.0	4.4	43.04	cccaaggGatgcacAgcaC	GtgcTgtgcatCccttggg	9.038609	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-352-502-0	192	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	9.038609	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-356-502-0	189	LEFT	337	356	4	YES	20	59.308	50.0	2.38	0.0	2.74	43.04	aaggGatgcacAgcaCtgtA	TacaGtgcTgtgcatCcctt	7.385325	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-356-502-0	189	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	7.385325	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-362-502-0	183	LEFT	343	362	4	YES	20	57.731	45.0	2.38	0.0	3.13	42.83	tgcacAgcaCtgtAtggaaA	TttccaTacaGtgcTgtgca	8.961611	0.00	0.00
+chr7A-7659-dCAPS-TspRI,72-nncastgnn-362-502-0	183	RIGHT	525	502	1	YES	24	57.307	37.5	0.0	0.0	2.57	42.21	attGctacctctgatccataatCa	tGattatggatcagaggtagCaat	8.961611	0.00	0.00
+
+
+Sites that can differ all for chr7A-7659
+21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 36, 41, 46, 47, 49, 54, 57, 58, 63, 64, 65, 68, 71, 72, 75, 82, 84, 85, 87, 90, 91, 94, 97, 99, 100, 101, 105, 106, 108, 110, 113, 114, 117, 123, 124, 125, 132, 134, 135, 136, 137, 138, 139, 142, 143, 144, 154, 157, 169, 193, 196, 199, 202, 203, 204, 207, 215, 218, 224, 225, 226, 228, 229, 232, 238, 243, 245, 246, 257, 258, 259, 291, 293, 294, 295, 296, 297, 302, 303, 304, 321, 322, 341, 348, 352, 356, 362, 426, 427, 501, 522, 538, 558, 573, 574, 581, 590, 593, 596, 600, 602, 633, 634, 661, 724, 735, 829, 832, 833, 848, 853, 857, 867, 901, 904, 916, 917, 919, 921, 922, 924, 925, 926, 927, 934, 955, 958, 962, 964, 966, 967, 968
+
+CAPS cut information for snp chr7A-7659
+Enzyme	Enzyme_seq	Change_pos	Other_cut_pos	Changed_sequence
+ApoI,68	raatty	499		actagttcaaaactgcaaAa[t/c]ttattatggatcagaggtag
+AseI,32	attaat	503	70	actagttcaaaactgcaaca[t/c]tAattatggatcagaggtag
+MluCI,63	aatt	499	69, 167, 719, 821, 22, 892	actagttcaaaactgcaaAa[t/c]ttattatggatcagaggtag
+MseI,132	ttaa	503	626, 404, 238, 71	actagttcaaaactgcaaca[t/c]tAattatggatcagaggtag
+DdeI,66	ctnag	505	665, 750	actagttcaaaactgcaaca[c/t]ttaGtatggatcagaggtag
+SspI,68	aatatt	499		actagttcaaaactgcaaTa[t/c]ttattatggatcagaggtag
+TspRI,72	nncastgnn	503	348, 896	actagttcaaaactgcaaca[c/t]tGattatggatcagaggtag
+
+
+

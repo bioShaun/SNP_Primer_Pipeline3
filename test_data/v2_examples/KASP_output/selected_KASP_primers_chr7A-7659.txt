@@ -1,0 +1,28 @@
+index	product_size	type	start	end	variation number	3'diffall	length	Tm	GCcontent	any	3'	end_stability	hairpin	primer_seq	ReverseComplement	penalty	compl_any	compl_end	score
+chr7A-7659-522-0-Allele-T	68	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaT	Atgttgcagttttgaactagtccc	10.176593	0.00	0.00	7.043882352941176
+chr7A-7659-522-0-Allele-C	68	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaC	Gtgttgcagttttgaactagtccc	10.176593	0.00	0.00	7.043882352941176
+chr7A-7659-522-0-Common	68	RIGHT	545	522	2	YES	24	58.102	41.667	0.0	0.0	1.9	38.63	tgagtacCactacggattgtattG	CaatacaatccgtagtGgtactca	10.176593	0.00	0.00	7.043882352941176
+chr7A-7659-538-0-Allele-T	84	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaT	Atgttgcagttttgaactagtccc	9.035568	0.00	0.00	6.737814285714285
+chr7A-7659-538-0-Allele-C	84	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaC	Gtgttgcagttttgaactagtccc	9.035568	0.00	0.00	6.737814285714285
+chr7A-7659-538-0-Common	84	RIGHT	561	538	2	YES	24	59.243	41.667	0.0	0.0	3.34	0.0	agcTgatctttgttgttgagtacC	GgtactcaacaacaaagatcAgct	9.035568	0.00	0.00	6.737814285714285
+chr7A-7659-573-0-Allele-T	115	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaT	Atgttgcagttttgaactagtccc	5.104259	0.00	0.00	6.193947826086957
+chr7A-7659-573-0-Allele-C	115	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaC	Gtgttgcagttttgaactagtccc	5.104259	0.00	0.00	6.193947826086957
+chr7A-7659-573-0-Common	115	RIGHT	592	573	4	YES	20	60.826	55.0	0.0	0.0	5.8	0.0	tgTttgttgtgCtaggggGC	GCcccctaGcacaacaaAca	5.104259	0.00	0.00	6.193947826086957
+chr7A-7659-574-0-Allele-T	116	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaT	Atgttgcagttttgaactagtccc	5.976925	0.00	0.00	6.151003448275862
+chr7A-7659-574-0-Allele-C	116	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaC	Gtgttgcagttttgaactagtccc	5.976925	0.00	0.00	6.151003448275862
+chr7A-7659-574-0-Common	116	RIGHT	593	574	4	YES	20	58.301	50.0	0.0	0.0	5.4	0.0	TtgTttgttgtgCtaggggG	CcccctaGcacaacaaAcaA	5.976925	0.00	0.00	6.151003448275862
+chr7A-7659-633-0-Allele-T	177	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaT	Atgttgcagttttgaactagtccc	6.373068	0.68	0.00	5.8101576271186435
+chr7A-7659-633-0-Allele-C	177	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaC	Gtgttgcagttttgaactagtccc	6.373068	0.68	0.00	5.8101576271186435
+chr7A-7659-633-0-Common	177	RIGHT	654	633	2	YES	22	60.095	54.545	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtAC	GTacacacaggtggtctagagc	6.373068	0.68	0.00	5.8101576271186435
+chr7A-7659-634-0-Allele-T	177	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaT	Atgttgcagttttgaactagtccc	6.446915	0.68	0.00	5.758457627118643
+chr7A-7659-634-0-Allele-C	177	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaC	Gtgttgcagttttgaactagtccc	6.446915	0.68	0.00	5.758457627118643
+chr7A-7659-634-0-Common	177	RIGHT	654	634	1	YES	21	58.832	52.381	0.0	0.0	2.9	41.09	gctctagaccacctgtgtgtA	Tacacacaggtggtctagagc	6.446915	0.68	0.00	5.758457627118643
+chr7A-7659-661-0-Allele-T	207	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaT	Atgttgcagttttgaactagtccc	10.147998	0.00	0.00	5.56543768115942
+chr7A-7659-661-0-Allele-C	207	LEFT	478	501	1	YES	24	59.722	41.667	2.92	0.0	2.71	42.84	gggactagttcaaaactgcaacaC	Gtgttgcagttttgaactagtccc	10.147998	0.00	0.00	5.56543768115942
+chr7A-7659-661-0-Common	207	RIGHT	684	661	1	YES	24	58.13	41.667	0.0	0.0	2.52	0.0	tgccctaaatgatacctgagattC	Gaatctcaggtatcatttagggca	10.147998	0.00	0.00	5.56543768115942
+
+
+Sites that can differ all for chr7A-7659
+21, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 36, 41, 46, 47, 49, 54, 57, 58, 63, 64, 65, 68, 71, 72, 75, 82, 84, 85, 87, 90, 91, 94, 97, 99, 100, 101, 105, 106, 108, 110, 113, 114, 117, 123, 124, 125, 132, 134, 135, 136, 137, 138, 139, 142, 143, 144, 154, 157, 169, 193, 196, 199, 202, 203, 204, 207, 215, 218, 224, 225, 226, 228, 229, 232, 238, 243, 245, 246, 257, 258, 259, 291, 293, 294, 295, 296, 297, 302, 303, 304, 321, 322, 341, 348, 352, 356, 362, 426, 427, 501, 522, 538, 558, 573, 574, 581, 590, 593, 596, 600, 602, 633, 634, 661, 724, 735, 829, 832, 833, 848, 853, 857, 867, 901, 904, 916, 917, 919, 921, 922, 924, 925, 926, 927, 934, 955, 958, 962, 964, 966, 967, 968
+
+

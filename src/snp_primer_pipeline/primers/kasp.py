@@ -53,7 +53,7 @@ class KASPDesigner:
             
         # Auto-detect config path if not provided
         if config_path is None:
-            config_path = Path(__file__).parent.parent.parent / "bin" / "primer3_config"
+            config_path = Path(__file__).parent.parent.parent.parent / "bin" / "primer3_config"
             
         # Don't pass config_path as settings_file - we handle thermodynamic parameters in Primer3Input
         self.primer3_runner = Primer3Runner(primer3_path, settings_file=None)

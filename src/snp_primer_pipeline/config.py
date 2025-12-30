@@ -124,7 +124,7 @@ class SoftwarePaths:
         if sys.platform.startswith('linux'):
             primer3_path = base_path / "primer3_core"
             # Use V2 muscle path to ensure compatibility
-            muscle_path = Path(__file__).parent.parent.parent.parent / "SNP_Primer_Pipeline2" / "bin" / "muscle"
+            muscle_path = base_path / "muscle"
         elif sys.platform == "win32" or sys.platform == "cygwin":
             primer3_path = base_path / "primer3_core.exe"
             muscle_path = base_path / "muscle.exe"

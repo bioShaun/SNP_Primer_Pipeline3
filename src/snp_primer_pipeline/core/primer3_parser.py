@@ -34,9 +34,8 @@ class Primer3Input:
         # Set thermodynamic parameters path - try multiple locations
         config_dir = None
         possible_paths = [
-            Path(__file__).parent.parent.parent / "bin" / "primer3_config",
-            Path.cwd() / "bin" / "primer3_config",
-            Path(__file__).parent.parent.parent.parent / "bin" / "primer3_config"
+            Path(__file__).parent.parent.parent.parent / "bin" / "primer3_config",
+            Path.cwd() / "bin" / "primer3_config"
         ]
         
         for path in possible_paths:
