@@ -96,6 +96,25 @@ def run_pipeline(config: PipelineConfig) -> None:
         flanking_fasta = config.output_dir / "flanking_sequences.fa"
         flanking_extractor.extract_sequences(flanking_regions, flanking_fasta)
         
+        # Load extracted sequences
+        extracted_sequences = {}
+        current_id = None
+        current_seq = []
+        
+        if flanking_fasta.exists():
+            with open(flanking_fasta, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith('>'):
+                        if current_id:
+                            extracted_sequences[current_id] = ''.join(current_seq)
+                        current_id = line[1:].split()[0]  # Take ID up to first whitespace
+                        current_seq = []
+                    else:
+                        current_seq.append(line)
+                if current_id:
+                    extracted_sequences[current_id] = ''.join(current_seq)
+        
         # Step 7: Process each SNP
         logger.info("Step 7: Processing SNPs for primer design...")
         
@@ -118,6 +137,7 @@ def run_pipeline(config: PipelineConfig) -> None:
                 process_snp(
                     snp,
                     snp_regions[snp.name],
+                    extracted_sequences,
                     config
                 )
             except Exception as e:
@@ -134,6 +154,7 @@ def run_pipeline(config: PipelineConfig) -> None:
 def process_snp(
     snp,
     flanking_regions: List,
+    extracted_sequences: Dict[str, str],
     config: PipelineConfig
 ) -> None:
     """
@@ -142,6 +163,7 @@ def process_snp(
     Args:
         snp: SNP object
         flanking_regions: List of flanking regions for this SNP
+        extracted_sequences: Dictionary of extracted sequences by ID
         config: Pipeline configuration
     """
     logger = logging.getLogger(__name__)
@@ -156,18 +178,24 @@ def process_snp(
     # Write sequences to FASTA
     sequences = {}
     target_sequence = None
+    target_snp_position = None
     
     with open(snp_fasta, 'w') as f:
         for region in flanking_regions:
             seq_id = f"{region.snp_name}_{region.chromosome}_{region.allele}_{region.snp_position_in_region}"
-            # For now, use a placeholder sequence - in practice, this would come from the extracted sequences
-            sequence = "N" * 1000  # Placeholder
+            
+            if seq_id not in extracted_sequences:
+                logger.warning(f"Sequence not found for {seq_id}, skipping")
+                continue
+                
+            sequence = extracted_sequences[seq_id]
             sequences[seq_id] = sequence
             f.write(f">{seq_id}\n{sequence}\n")
             
             # Identify target sequence (first one for now)
             if target_sequence is None:
                 target_sequence = sequence
+                target_snp_position = region.snp_position_in_region - 1
     
     if len(sequences) < 2:
         logger.warning(f"Not enough sequences for alignment for SNP {snp.name}")
@@ -209,7 +237,7 @@ def process_snp(
             
             kasp_primers = kasp_designer.design_primers(
                 target_sequence,
-                snp.snp_position,
+                target_snp_position,
                 (snp.allele_a, snp.allele_b),
                 config.primer_product_size_range,
                 sites_diff_all,
@@ -222,7 +250,7 @@ def process_snp(
             kasp_output = snp_output_dir / f"KASP_primers_{snp.name}.txt"
             kasp_designer.format_output(kasp_primers, snp.name, kasp_output, sites_diff_all)
             
-            logger.info(f"Designed {len(kasp_primers)} KASP primer pairs for {snp.name}")
+            logger.info(f"Designed {len(kasp_primers) // 3} KASP primer pairs for {snp.name}")
             
         except PrimerDesignError as e:
             logger.warning(f"KASP design failed for SNP {snp.name}: {e}")
@@ -245,7 +273,7 @@ def process_snp(
             # Find usable enzymes
             caps_enzymes, dcaps_enzymes = caps_designer.find_usable_enzymes(
                 target_sequence,
-                snp.snp_position,
+                target_snp_position,
                 (snp.allele_a, snp.allele_b),
                 config.max_price
             )
@@ -259,7 +287,7 @@ def process_snp(
                 try:
                     primers = caps_designer.design_caps_primers(
                         target_sequence,
-                        snp.snp_position,
+                        target_snp_position,
                         (snp.allele_a, snp.allele_b),
                         enzyme,
                         (300, 900),  # CAPS product size range

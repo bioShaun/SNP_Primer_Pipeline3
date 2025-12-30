@@ -359,8 +359,10 @@ class Primer3OutputParser:
                 left_end_stability = float(data.get(f"PRIMER_LEFT_{i}_END_STABILITY", 0))
                 
                 # Parse position (format: start,length)
+                # Note: Assuming 1-based indexing from Primer3 (PRIMER_FIRST_BASE_INDEX=1)
                 if left_pos and ',' in left_pos:
-                    left_start, left_length = map(int, left_pos.split(','))
+                    left_p3_start, left_length = map(int, left_pos.split(','))
+                    left_start = left_p3_start - 1  # Convert to 0-based
                     left_end = left_start + left_length - 1
                 else:
                     left_start = left_end = left_length = 0
@@ -391,9 +393,12 @@ class Primer3OutputParser:
                 right_end_stability = float(data.get(f"PRIMER_RIGHT_{i}_END_STABILITY", 0))
                 
                 # Parse position (format: start,length)
+                # Note: Assuming 1-based indexing from Primer3
+                # For RIGHT primer, pos is the 5' end (highest index)
                 if right_pos and ',' in right_pos:
-                    right_start, right_length = map(int, right_pos.split(','))
-                    right_end = right_start + right_length - 1
+                    right_p3_start, right_length = map(int, right_pos.split(','))
+                    right_end = right_p3_start - 1  # Convert to 0-based 5' end
+                    right_start = right_end - right_length + 1  # Calculate 3' end
                 else:
                     right_start = right_end = right_length = 0
                 

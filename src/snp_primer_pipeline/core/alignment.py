@@ -121,17 +121,20 @@ class MultipleSequenceAlignment:
         min_gap_right: int = 20,
     ) -> Tuple[List[int], List[int]]:
         """
-        Find variant sites in the alignment.
+        Find variant sites in the alignment using V2 logic.
         
         Args:
             target_name: Name of target sequence
-            min_gap_left: Minimum gap-free positions to the left
-            min_gap_right: Minimum gap-free positions to the right
+            min_gap_left: Minimum gap-free positions to the left (not used in V2 logic)
+            min_gap_right: Minimum gap-free positions to the right (not used in V2 logic)
             
         Returns:
             Tuple of (sites_diff_all, sites_diff_any):
-            - sites_diff_all: Positions where target differs from ALL other sequences
-            - sites_diff_any: Positions where target differs from ANY other sequence
+            - sites_diff_all: Template positions where target differs from ALL other sequences
+            - sites_diff_any: Template positions where target differs from ANY other sequence
+            
+            Note: Returns TEMPLATE coordinates (0-based), not alignment coordinates.
+            This matches V2 behavior.
             
         Raises:
             AlignmentError: If target sequence not found
@@ -156,51 +159,68 @@ class MultipleSequenceAlignment:
             # No other sequences to compare
             return [], []
         
-        sites_diff_all = []  # Target differs from ALL others
-        sites_diff_any = []  # Target differs from ANY others
+        # Get clean template sequence length for bounds checking
+        template_length = len(target_seq.clean_sequence)
         
-        for pos in range(self.alignment_length):
-            # Skip positions with insufficient flanking regions
-            if pos < min_gap_left or pos >= self.alignment_length - min_gap_right:
+        # Find gap boundaries similar to V2
+        target_gaps = target_seq.sequence
+        gap_left = max([len(seq.sequence) - len(seq.sequence.lstrip('-')) for seq in self.sequences])
+        gap_right = min([len(seq.sequence.rstrip('-')) for seq in self.sequences])
+        
+        # Build t2a and a2t mappings for the target sequence
+        t2a = {}  # template to alignment mapping
+        a2t = {}  # alignment to template mapping
+        template_pos = 0
+        
+        for align_pos, char in enumerate(target_seq.sequence):
+            if char != "-":
+                t2a[template_pos] = align_pos
+                a2t[align_pos] = template_pos
+                template_pos += 1
+        
+        sites_diff_all = []  # Target differs from ALL others (template coords)
+        sites_diff_any = []  # Target differs from ANY others (template coords)
+        
+        # V2-style loop: only check within gap boundaries
+        for i in range(gap_left, gap_right):
+            b1 = target_seq.sequence[i]  # target base at alignment position i
+            
+            if b1 == "-":  # Skip gaps in target
+                continue
+                
+            pos_template = a2t.get(i)  # position in the target template (no gaps)
+            if pos_template is None:
+                continue
+                
+            # V2-style boundary check
+            if pos_template < 20 or pos_template > template_length - 20:
                 continue
             
-            target_char = target_seq.sequence[pos]
-            
-            # Skip gaps in target
-            if target_char == "-":
-                continue
-            
-            # Check if flanking regions are gap-free
-            if not self._is_gap_free_region(target_seq, pos, min_gap_left, min_gap_right):
-                continue
-            
-            # Compare with other sequences
+            # Compare with other sequences at the same alignment position
             diff_from_all = True
             diff_from_any = False
             
             for other_seq in other_seqs:
-                other_char = other_seq.sequence[pos]
+                b2 = other_seq.sequence[i]
                 
                 # Skip gaps in other sequences
-                if other_char == "-":
+                if b2 == "-":
                     continue
                 
-                # Check if flanking regions are gap-free
-                if not self._is_gap_free_region(other_seq, pos, min_gap_left, min_gap_right):
-                    continue
-                
-                if target_char != other_char:
+                if b1 != b2:
                     diff_from_any = True
                 else:
                     diff_from_all = False
             
             if diff_from_any:
-                sites_diff_any.append(pos)
+                if pos_template not in sites_diff_any:  # avoid duplicates from gaps
+                    sites_diff_any.append(pos_template)
             
             if diff_from_all:
-                sites_diff_all.append(pos)
+                if pos_template not in sites_diff_all:  # avoid duplicates from gaps
+                    sites_diff_all.append(pos_template)
         
-        return sites_diff_all, sites_diff_any
+        return sorted(sites_diff_all), sorted(sites_diff_any)
     
     def _is_gap_free_region(
         self,

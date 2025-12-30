@@ -45,10 +45,12 @@ class BlastRunner:
         """
         cmd = [
             "blastn",
+            "-task", "blastn",  # V2 compatibility
             "-query", str(query_file),
             "-db", str(self.reference),
             "-out", str(output_file),
             "-outfmt", "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qseq sseq slen",
+            "-word_size", "11",  # V2 compatibility - important for finding all homeologs
             "-num_threads", str(self.threads),
             "-max_target_seqs", "20"
         ]
