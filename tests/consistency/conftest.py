@@ -103,7 +103,7 @@ def v3_pipeline_runner(v3_pipeline_config, tmp_path):
             from snp_primer_pipeline.config import PipelineConfig
             from snp_primer_pipeline.main import run_pipeline
         except ImportError:
-            pytest.skip("SNP_Primer_Pipeline3_claude not properly installed")
+            pytest.skip("SNP_Primer_Pipeline3 not properly installed")
         
         # Merge config with any overrides
         config_dict = {**v3_pipeline_config, **kwargs}

@@ -229,7 +229,7 @@ def generate_comprehensive_report(results: Dict[str, Any], output_dir: Path) -> 
         report_lines.extend([
             "## 🎉 Success!",
             "",
-            "All consistency tests have passed! The SNP_Primer_Pipeline3_claude implementation",
+            "All consistency tests have passed! The SNP_Primer_Pipeline3 implementation",
             "produces identical results to SNP_Primer_Pipeline2.",
             "",
             "### Next Steps",

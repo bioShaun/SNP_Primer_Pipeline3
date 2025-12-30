@@ -2,7 +2,7 @@
 
 ## 🎯 Project Overview
 
-This document tracks the progress of implementing a comprehensive consistency test suite to ensure SNP_Primer_Pipeline3_claude produces identical results to SNP_Primer_Pipeline2.
+This document tracks the progress of implementing a comprehensive consistency test suite to ensure SNP_Primer_Pipeline3 produces identical results to SNP_Primer_Pipeline2.
 
 ## ✅ Completed Components (98% Complete)
 
@@ -192,7 +192,7 @@ The consistency test suite success criteria:
 
 ```bash
 # Run all consistency tests
-cd SNP_Primer_Pipeline3_claude
+cd SNP_Primer_Pipeline3
 python -m pytest tests/consistency/ -v
 
 # Run specific test categories
@@ -216,7 +216,7 @@ conda install -c bioconda primer3
 ## 📁 File Structure
 
 ```
-SNP_Primer_Pipeline3_claude/
+SNP_Primer_Pipeline3/
 ├── tests/
 │   ├── consistency/
 │   │   ├── __init__.py

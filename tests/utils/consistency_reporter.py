@@ -149,7 +149,7 @@ class ConsistencyReporter:
             report_lines.extend([
                 "## 🎉 All Tests Passed!",
                 "",
-                "The SNP_Primer_Pipeline3_claude implementation is fully consistent with SNP_Primer_Pipeline2.",
+                "The SNP_Primer_Pipeline3 implementation is fully consistent with SNP_Primer_Pipeline2.",
                 "No code changes are required.",
                 ""
             ])

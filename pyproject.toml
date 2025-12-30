@@ -1,7 +1,7 @@
 [project]
-name = "snp-primer-pipeline-claude"
+name = "snp-primer-pipeline3"
 version = "3.0.0"
-description = "SNP Primer Design Pipeline 3 Claude - Modern refactor of SNP_Primer_Pipeline2 for KASP and CAPS/dCAPS primer design"
+description = "SNP Primer Design Pipeline 3 - Modern refactor of SNP_Primer_Pipeline2 for KASP and CAPS/dCAPS primer design"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "GPL-2.0"}

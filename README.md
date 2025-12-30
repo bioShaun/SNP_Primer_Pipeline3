@@ -1,4 +1,6 @@
-# SNP Primer Pipeline 3 Claude
+# SNP Primer Pipeline 3
+
+**English Documentation** | [中文文档](README_zh.md)
 
 A modern, modular Python pipeline for designing KASP and CAPS/dCAPS primers for SNP genotyping in any species. This is a refactored version of SNP_Primer_Pipeline2 with improved architecture, testability, and maintainability.
 
@@ -18,14 +20,12 @@ A modern, modular Python pipeline for designing KASP and CAPS/dCAPS primers for 
 
 - Python 3.10 or higher
 - BLAST+ (blastn, blastdbcmd)
-- MUSCLE or MAFFT for multiple sequence alignment
-- Primer3 for primer design
 
 ### Install from source
 
 ```bash
 git clone <repository-url>
-cd SNP_Primer_Pipeline3_claude
+cd SNP_Primer_Pipeline3
 pip install -e .
 ```
 
@@ -35,13 +35,13 @@ pip install -e .
 
 ```bash
 # Design both KASP and CAPS primers
-python -m snp_primer_pipeline.main input.csv reference_db -o output_dir
+snp-primer input.csv reference_db -o output_dir
 
 # Design only KASP primers
-python -m snp_primer_pipeline.main input.csv reference_db --no-caps
+snp-primer input.csv reference_db --no-caps
 
 # Design only CAPS primers with custom enzyme price limit
-python -m snp_primer_pipeline.main input.csv reference_db --no-kasp --max-price 150
+snp-primer input.csv reference_db --no-kasp --max-price 150
 ```
 
 ### Input Format
@@ -200,7 +200,7 @@ pytest tests/ -k "property"
 ### Project Structure
 
 ```
-SNP_Primer_Pipeline3_claude/
+SNP_Primer_Pipeline3/
 ├── src/snp_primer_pipeline/     # Main package
 │   ├── core/                    # Core processing modules
 │   ├── primers/                 # Primer design modules

@@ -1,4 +1,4 @@
-"""SNP Primer Design Pipeline 3 Claude.
+"""SNP Primer Design Pipeline 3.
 
 A modern, modular pipeline for designing KASP and CAPS/dCAPS primers
 for SNP genotyping in any species. This is a refactored version of
