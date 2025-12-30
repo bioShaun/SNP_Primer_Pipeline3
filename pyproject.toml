@@ -1,0 +1,107 @@
+[project]
+name = "snp-primer-pipeline-claude"
+version = "3.0.0"
+description = "SNP Primer Design Pipeline 3 Claude - Modern refactor of SNP_Primer_Pipeline2 for KASP and CAPS/dCAPS primer design"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "GPL-2.0"}
+authors = [
+    {name = "Junli Zhang", email = "zhjl86@gmail.com"},
+    {name = "Claude Assistant", email = "claude@anthropic.com"},
+]
+keywords = ["snp", "primer", "kasp", "caps", "pcr", "genotyping", "bioinformatics"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+dependencies = [
+    "pyyaml>=6.0",
+    "loguru>=0.7.0",
+    "tqdm>=4.66.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-html>=4.1.0",
+    "pytest-xdist>=3.3.0",
+    "hypothesis>=6.88.0",
+    "black>=23.0.0",
+    "mypy>=1.7.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+snp-primer = "snp_primer_pipeline.main:main"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "W", "C90", "I", "N", "UP", "B", "C4", "A", "RET", "SIM", "ARG", "PL", "TRY", "RUF"]
+ignore = ["E501", "B008", "C901"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+markers = [
+    "consistency: marks tests as consistency tests",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "unit: marks tests as unit tests",
+    "integration: marks tests as integration tests",
+    "e2e: marks tests as end-to-end tests",
+]
+addopts = "-v --cov=snp_primer_pipeline --cov-report=html --cov-report=term-missing"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src/snp_primer_pipeline"]
+omit = [
+    "tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.hypothesis]
+max_examples = 100
