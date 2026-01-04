@@ -59,6 +59,27 @@ Where:
 - `chromosome`: Target chromosome name
 - `flanking_sequence`: DNA sequence with SNP in IUPAC bracket notation
 
+## Input Formats
+
+The pipeline supports two input formats:
+
+### 1. Polymarker CSV Format (Default)
+Comma-separated file with three columns:
+```csv
+SNP_ID,Chromosome,Sequence[Ref/Alt]Sequence
+chr7A-7659,chr7A,ATCGATCGATCGATCG[T/C]GCTAGCTAGCTAGCTA
+```
+
+### 2. Coordinate Format (Auto-detected)
+Tab or space-separated file with four columns (no header):
+```
+Chromosome  Position  Ref  Alt
+chr7A       7659      T    C
+chr7A       7716      A    G
+```
+
+The pipeline automatically detects the input format and fetches flanking sequences from the reference genome when using coordinate format.
+
 ### Python API
 
 ```python

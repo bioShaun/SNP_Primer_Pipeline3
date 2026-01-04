@@ -59,6 +59,27 @@ SNP2,chr2B,GCTAGCTAGCTA[C/T]AGCTAGCTAGT
 - `chromosome`：目标染色体名称
 - `flanking_sequence`：包含 IUPAC 括号标记的 SNP 的 DNA 序列
 
+## 输入格式
+
+流程支持两种输入格式：
+
+### 1. Polymarker CSV 格式（默认）
+逗号分隔的文件，包含三列：
+```csv
+SNP_ID,Chromosome,Sequence[Ref/Alt]Sequence
+chr7A-7659,chr7A,ATCGATCGATCGATCG[T/C]GCTAGCTAGCTAGCTA
+```
+
+### 2. 坐标格式（自动检测）
+制表符或空格分隔的文件，包含四列（无表头）：
+```
+Chromosome  Position  Ref  Alt
+chr7A       7659      T    C
+chr7A       7716      A    G
+```
+
+流程会自动检测输入格式，并在使用坐标格式时从参考基因组中获取侧翼序列。
+
 ### Python API 用法
 
 ```python

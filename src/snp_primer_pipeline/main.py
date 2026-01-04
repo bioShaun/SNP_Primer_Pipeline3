@@ -51,8 +51,20 @@ def run_pipeline(config: PipelineConfig) -> None:
     try:
         # Step 1: Parse input file
         logger.info("Step 1: Parsing input file...")
+        
+        # Detect input format
+        input_format = PolymarkerParser.detect_format(config.input_file)
+        logger.info(f"Detected input format: {input_format}")
+        
         parser = PolymarkerParser(config.input_file)
-        snps = parser.parse()
+        
+        if input_format == 'coordinates':
+            # Parse coordinate file and fetch sequences
+            snps = parser.parse_coordinates(config.reference_file)
+        else:
+            # Standard polymarker format
+            snps = parser.parse()
+        
         logger.info(f"Parsed {len(snps)} SNPs")
         
         if not snps:
