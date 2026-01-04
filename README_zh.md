@@ -44,20 +44,7 @@ snp-primer input.csv reference_db --no-caps
 snp-primer input.csv reference_db --no-kasp --max-price 150
 ```
 
-### 输入格式
 
-输入文件应为 CSV 格式，包含以下内容：
-
-```
-SNP_name,chromosome,flanking_sequence
-SNP1,chr1A,ATCGATCGATCG[A/G]TCGATCGATCG
-SNP2,chr2B,GCTAGCTAGCTA[C/T]AGCTAGCTAGT
-```
-
-其中：
-- `SNP_name`：SNP 的唯一标识符
-- `chromosome`：目标染色体名称
-- `flanking_sequence`：包含 IUPAC 括号标记的 SNP 的 DNA 序列
 
 ## 输入格式
 

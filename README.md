@@ -44,20 +44,7 @@ snp-primer input.csv reference_db --no-caps
 snp-primer input.csv reference_db --no-kasp --max-price 150
 ```
 
-### Input Format
 
-The input file should be a CSV file with the following format:
-
-```
-SNP_name,chromosome,flanking_sequence
-SNP1,chr1A,ATCGATCGATCG[A/G]TCGATCGATCG
-SNP2,chr2B,GCTAGCTAGCTA[C/T]AGCTAGCTAGT
-```
-
-Where:
-- `SNP_name`: Unique identifier for the SNP
-- `chromosome`: Target chromosome name
-- `flanking_sequence`: DNA sequence with SNP in IUPAC bracket notation
 
 ## Input Formats
 
