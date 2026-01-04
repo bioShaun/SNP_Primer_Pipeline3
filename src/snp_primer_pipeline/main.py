@@ -126,6 +126,7 @@ def run_pipeline(config: PipelineConfig) -> None:
             snp_regions[region.snp_name].append(region)
         
         # Process each SNP
+        all_kasp_results = []
         for snp in snps:
             if snp.name not in snp_regions:
                 logger.warning(f"No flanking regions found for SNP {snp.name}")
@@ -134,16 +135,43 @@ def run_pipeline(config: PipelineConfig) -> None:
             logger.info(f"Processing SNP: {snp.name}")
             
             try:
-                process_snp(
+                results = process_snp(
                     snp,
                     snp_regions[snp.name],
                     extracted_sequences,
                     config
                 )
+                if results.get("kasp"):
+                    # Add SNP name to results for merged output
+                    for r in results["kasp"]:
+                        r["snp_name"] = snp.name
+                    all_kasp_results.extend(results["kasp"])
             except Exception as e:
                 logger.error(f"Failed to process SNP {snp.name}: {e}")
                 continue
         
+        # Step 8: Write merged KASP results
+        if all_kasp_results:
+            logger.info("Step 8: Writing merged KASP results...")
+            kasp_designer = KASPDesigner(
+                max_tm=config.max_tm,
+                max_size=config.max_primer_size,
+                pick_anyway=config.pick_anyway
+            )
+            
+            merged_complete = config.output_dir / "all_KASP_primers.txt"
+            merged_simple = config.output_dir / "all_KASP_primers_summary.txt"
+            
+            # For merged output, we handle snp_name internally in results
+            # We need to slightly adjust format_output and format_simple_output 
+            # or just use a helper to format them here.
+            # Actually, I'll modify format_output in kasp.py to optionally use snp_name from result.
+            kasp_designer.format_output(
+                all_kasp_results, "", merged_complete, None, 
+                show_variant_sites=False # Footer doesn't make sense for merged
+            )
+            kasp_designer.format_simple_output(all_kasp_results, "", merged_simple)
+            
         logger.info("Pipeline completed successfully")
         
     except Exception as e:
@@ -156,7 +184,7 @@ def process_snp(
     flanking_regions: List,
     extracted_sequences: Dict[str, str],
     config: PipelineConfig
-) -> None:
+) -> Dict[str, List[Dict[str, Any]]]:
     """
     Process a single SNP for primer design.
     
@@ -165,8 +193,12 @@ def process_snp(
         flanking_regions: List of flanking regions for this SNP
         extracted_sequences: Dictionary of extracted sequences by ID
         config: Pipeline configuration
+        
+    Returns:
+        Dictionary mapping design type ('kasp', 'caps') to lists of results
     """
     logger = logging.getLogger(__name__)
+    results = {"kasp": [], "caps": []}
     
     # Create SNP-specific output directory
     snp_output_dir = config.output_dir / f"SNP_{snp.name}"
@@ -203,7 +235,7 @@ def process_snp(
     
     if len(sequences) < 2:
         logger.warning(f"Not enough sequences for alignment for SNP {snp.name}")
-        return
+        return results
     
     # Perform multiple sequence alignment
     alignment = None
@@ -269,6 +301,7 @@ def process_snp(
             kasp_summary = snp_output_dir / f"KASP_primers_{snp.name}_summary.txt"
             kasp_designer.format_simple_output(kasp_primers, snp.name, kasp_summary)
             
+            results["kasp"] = kasp_primers
             logger.info(f"Designed {len(kasp_primers) // 3} KASP primer pairs for {snp.name}")
             
         except PrimerDesignError as e:
@@ -328,10 +361,13 @@ def process_snp(
                 sites_diff_all
             )
             
+            results["caps"] = all_caps_primers
             logger.info(f"Designed {len(all_caps_primers)} CAPS primer pairs for {snp.name}")
             
         except PrimerDesignError as e:
             logger.warning(f"CAPS design failed for SNP {snp.name}: {e}")
+            
+    return results
 
 
 def main() -> None:

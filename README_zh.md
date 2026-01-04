@@ -129,9 +129,10 @@ primers = kasp_designer.design_primers(
 流程生成以下输出：
 
 ### KASP 引物
-- `KASP_primers_{SNP_name}.txt`：设计的 KASP 引物及其评分
-- 每个 SNP 等位基因的特异性引物
-- 用于扩增的通用引物
+- `KASP_primers_{SNP_name}.txt`：每个 SNP 的详细设计结果，包含基因组坐标、Tm、GC 和评分。
+- `KASP_primers_{SNP_name}_summary.txt`：简化版输出，每组引物（Allele-A, Allele-B, Common）占一行。
+- `all_KASP_primers.txt`：所有 SNP 的合并详细结果。
+- `all_KASP_primers_summary.txt`：所有 SNP 的合并简化版汇总。
 
 ### CAPS 引物
 - `CAPS_primers_{SNP_name}.txt`：设计的 CAPS/dCAPS 引物

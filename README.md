@@ -129,9 +129,10 @@ The pipeline is organized into several modules:
 The pipeline generates the following outputs:
 
 ### KASP Primers
-- `KASP_primers_{SNP_name}.txt`: Designed KASP primers with scores
-- Allele-specific primers for each SNP allele
-- Common primers for amplification
+- `KASP_primers_{SNP_name}.txt`: Detailed results for each SNP, including genomic coordinates, Tm, GC, and scoring.
+- `KASP_primers_{SNP_name}_summary.txt`: Simplified single-line format for each primer set (Allele-A, Allele-B, Common).
+- `all_KASP_primers.txt`: Merged detailed results for all processed SNPs.
+- `all_KASP_primers_summary.txt`: Merged simplified results for all processed SNPs.
 
 ### CAPS Primers
 - `CAPS_primers_{SNP_name}.txt`: Designed CAPS/dCAPS primers

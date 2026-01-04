@@ -627,8 +627,9 @@ class KASPDesigner:
                 
                 # Write primer results
                 for result in kasp_results:
+                    curr_snp_name = snp_name or result.get("snp_name", "Unknown")
                     line = "\t".join([
-                        f"{snp_name}-{result['index']}",
+                        f"{curr_snp_name}-{result['index']}",
                         str(result['product_size']),
                         result['direction'],
                         str(result['start']),
@@ -680,8 +681,8 @@ class KASPDesigner:
             with open(output_file, 'w') as f:
                 # Write header
                 header = [
-                    "Index", "Allele_A", "Allele_B", "Common",
-                    "Product_Size", "Genomic_Range", "Score"
+                    "Index", "Allele_A", "Tm_A", "GC_A", "Allele_B", "Tm_B", "GC_B", 
+                    "Common", "Tm_C", "GC_C", "Product_Size", "Genomic_Range", "Score"
                 ]
                 f.write("\t".join(header) + "\n")
                 
@@ -694,6 +695,8 @@ class KASPDesigner:
                     allele_b = kasp_results[i + 1]
                     common = kasp_results[i + 2]
                     
+                    curr_snp_name = snp_name or allele_a.get("snp_name", "Unknown")
+                    
                     # Extract base index (remove -Allele-X/-Common suffix)
                     base_index = allele_a['index'].rsplit('-', 2)[0]
                     
@@ -705,10 +708,16 @@ class KASPDesigner:
                     
                     # Write single-line summary
                     line = "\t".join([
-                        f"{snp_name}-{base_index}",
+                        f"{curr_snp_name}-{base_index}",
                         allele_a['primer_seq'],
+                        f"{allele_a['tm']:.1f}",
+                        f"{allele_a['gc_percent']:.1f}",
                         allele_b['primer_seq'],
+                        f"{allele_b['tm']:.1f}",
+                        f"{allele_b['gc_percent']:.1f}",
                         common['primer_seq'],
+                        f"{common['tm']:.1f}",
+                        f"{common['gc_percent']:.1f}",
                         str(allele_a['product_size']),
                         genomic_range,
                         f"{allele_a['score']:.2f}" if isinstance(allele_a['score'], float) else str(allele_a['score'])
