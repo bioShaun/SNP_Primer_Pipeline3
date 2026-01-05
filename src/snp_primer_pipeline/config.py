@@ -128,12 +128,8 @@ class SoftwarePaths:
         """
         # Possible bin directory locations
         search_paths = [
-            # Development mode: bin/ next to src/
-            Path(__file__).parent.parent.parent / "bin",
-            # Installed location: share/snp-primer-pipeline/bin
-            Path(sys.prefix) / "share" / "snp-primer-pipeline" / "bin",
-            # User install location
-            Path(sys.prefix) / "local" / "share" / "snp-primer-pipeline" / "bin",
+            # Package's bin directory (inside the installed package)
+            Path(__file__).parent / "bin",
         ]
         
         # Platform-specific binary names

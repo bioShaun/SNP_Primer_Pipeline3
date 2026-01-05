@@ -52,16 +52,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["bin/*", "bin/**/*"]
-
-[tool.setuptools.data-files]
-"share/snp-primer-pipeline/bin" = [
-    "bin/primer3_core",
-    "bin/primer3_core_darwin64",
-    "bin/muscle",
-    "bin/muscle3.8.31_i86darwin64",
-]
-"share/snp-primer-pipeline/bin/primer3_config" = ["bin/primer3_config/*"]
+snp_primer_pipeline = ["bin/*", "bin/**/*"]
 
 [tool.black]
 line-length = 100
