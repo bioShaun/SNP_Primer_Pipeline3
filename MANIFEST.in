@@ -1,0 +1,22 @@
+# Include binary executables
+recursive-include bin *
+include bin/primer3_core
+include bin/primer3_core_darwin64
+include bin/muscle
+include bin/muscle3.8.31_i86darwin64
+
+# Include primer3 config files
+recursive-include bin/primer3_config *
+
+# Include resources
+recursive-include resources *
+
+# Include documentation
+include README.md
+include README_zh.md
+include LICENSE
+
+# Exclude compiled Python files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__

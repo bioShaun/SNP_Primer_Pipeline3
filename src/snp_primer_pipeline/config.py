@@ -119,29 +119,56 @@ class SoftwarePaths:
     
     @classmethod
     def auto_detect(cls) -> "SoftwarePaths":
-        """Auto-detect software paths based on platform."""
-        base_path = Path(__file__).parent.parent.parent / "bin"
+        """Auto-detect software paths based on platform.
         
+        Search order:
+        1. Package's bin directory (development mode / editable install)
+        2. Installed data directory (pip install from wheel)
+        3. System PATH
+        """
+        # Possible bin directory locations
+        search_paths = [
+            # Development mode: bin/ next to src/
+            Path(__file__).parent.parent.parent / "bin",
+            # Installed location: share/snp-primer-pipeline/bin
+            Path(sys.prefix) / "share" / "snp-primer-pipeline" / "bin",
+            # User install location
+            Path(sys.prefix) / "local" / "share" / "snp-primer-pipeline" / "bin",
+        ]
+        
+        # Platform-specific binary names
         if sys.platform.startswith('linux'):
-            primer3_path = base_path / "primer3_core"
-            # Use V2 muscle path to ensure compatibility
-            muscle_path = base_path / "muscle"
+            primer3_name = "primer3_core"
+            muscle_name = "muscle"
         elif sys.platform == "win32" or sys.platform == "cygwin":
-            primer3_path = base_path / "primer3_core.exe"
-            muscle_path = base_path / "muscle.exe"
+            primer3_name = "primer3_core.exe"
+            muscle_name = "muscle.exe"
         elif sys.platform == "darwin":  # macOS
-            primer3_path = base_path / "primer3_core_darwin64"
-            muscle_path = base_path / "muscle3.8.31_i86darwin64"
+            primer3_name = "primer3_core_darwin64"
+            muscle_name = "muscle3.8.31_i86darwin64"
         else:
             raise ConfigurationError(f"Unsupported platform: {sys.platform}")
         
-        # Check if files exist, fall back to system PATH
-        if not primer3_path.exists():
+        # Search for binaries in all possible locations
+        primer3_path = cls._find_in_search_paths(search_paths, primer3_name)
+        muscle_path = cls._find_in_search_paths(search_paths, muscle_name)
+        
+        # Fall back to system PATH if not found
+        if primer3_path is None:
             primer3_path = cls._find_in_path("primer3_core")
-        if not muscle_path.exists():
+        if muscle_path is None:
             muscle_path = cls._find_in_path("muscle")
         
         return cls(primer3_path=primer3_path, muscle_path=muscle_path)
+    
+    @classmethod
+    def _find_in_search_paths(cls, search_paths: list[Path], filename: str) -> Path | None:
+        """Find a file in a list of search directories."""
+        for base_path in search_paths:
+            file_path = base_path / filename
+            if file_path.exists() and file_path.is_file():
+                return file_path
+        return None
     
     @staticmethod
     def _find_in_path(executable: str) -> Path:
@@ -151,4 +178,7 @@ class SoftwarePaths:
             if exe_path.exists() and exe_path.is_file():
                 return exe_path
         
-        raise ConfigurationError(f"Could not find {executable} in PATH or bundled binaries")
+        raise ConfigurationError(
+            f"Could not find {executable} in bundled binaries or system PATH.\n"
+            f"Please install it using: conda install -c bioconda primer3  (or brew install primer3 on macOS)"
+        )
