@@ -174,15 +174,18 @@ class FlankingExtractor:
         flanking_regions = []
         snp_hit_counts = Counter()
         top_hits = {}  # Best hit for each query
+        query_metadata: Dict[str, Tuple[str, str, str]] = {}
+        known_snp_names = sorted(snp_positions.keys(), key=len, reverse=True)
         
         # First pass: collect valid hits and count
         valid_hits = []
         
         for query_id, hits in blast_hits.items():
-            snp_name, qchrom, allele = self._parse_query_id(query_id)
+            snp_name, qchrom, allele = self._parse_query_id(query_id, known_snp_names)
             
             if snp_name not in snp_positions:
                 continue
+            query_metadata[query_id] = (snp_name, qchrom, allele)
                 
             # Convert 0-based SNP position to 1-based for BLAST coordinate comparison
             snp_pos_0based = snp_positions[snp_name]
@@ -230,7 +233,9 @@ class FlankingExtractor:
             if snp_hit_counts[query_id] > max_hits:
                 continue
             
-            snp_name, qchrom, allele = self._parse_query_id(query_id)
+            snp_name, qchrom, allele = query_metadata.get(
+                query_id, self._parse_query_id(query_id, known_snp_names)
+            )
             
             # Prefer hits on target chromosome
             if qchrom == hit.subject_id:
@@ -249,8 +254,15 @@ class FlankingExtractor:
         
         return flanking_regions
     
-    def _parse_query_id(self, query_id: str) -> Tuple[str, str, str]:
+    def _parse_query_id(
+        self, query_id: str, known_snp_names: Optional[List[str]] = None
+    ) -> Tuple[str, str, str]:
         """Parse query ID into SNP name, chromosome, and allele."""
+        if known_snp_names:
+            parsed = self._parse_query_id_with_known_snps(query_id, known_snp_names)
+            if parsed is not None:
+                return parsed
+
         parts = query_id.split("_")
         if len(parts) >= 3:
             snp_name = "_".join(parts[:-2])
@@ -263,6 +275,24 @@ class FlankingExtractor:
             allele = "unknown"
         
         return snp_name, chrom, allele
+
+    def _parse_query_id_with_known_snps(
+        self, query_id: str, known_snp_names: List[str]
+    ) -> Optional[Tuple[str, str, str]]:
+        """Parse query ID using known SNP names to avoid underscore ambiguity."""
+        for snp_name in known_snp_names:
+            prefix = f"{snp_name}_"
+            if not query_id.startswith(prefix):
+                continue
+
+            remainder = query_id[len(prefix):]
+            if "_" not in remainder:
+                return snp_name, "unknown", "unknown"
+
+            chrom, allele = remainder.rsplit("_", 1)
+            return snp_name, chrom, allele
+
+        return None
     
     def _calculate_subject_snp_position(self, hit: BlastHit, snp_pos: int) -> Optional[int]:
         """
