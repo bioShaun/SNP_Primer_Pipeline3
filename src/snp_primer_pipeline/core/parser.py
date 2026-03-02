@@ -223,7 +223,7 @@ class PolymarkerParser:
         logger.info(f"Parsing coordinate input file: {self.input_file}")
         
         # Step 1: Parse coordinates
-        coordinates = []
+        self._coordinates = []
         line_number = 0
         
         try:
@@ -257,7 +257,7 @@ class PolymarkerParser:
                         logger.warning(f"Skipping line {line_number}: invalid alleles {ref}/{alt}")
                         continue
                     
-                    coordinates.append({
+                    self._coordinates.append({
                         'chrom': chrom,
                         'pos': pos,
                         'ref': ref.upper(),
@@ -267,18 +267,18 @@ class PolymarkerParser:
         except IOError as e:
             raise ParseError(f"Failed to read input file: {e}")
         
-        logger.info(f"Parsed {len(coordinates)} coordinate records")
+        logger.info(f"Parsed {len(self._coordinates)} coordinate records")
         
-        if not coordinates:
+        if not self._coordinates:
             return []
         
-        # Step 2: Fetch sequences using blastdbcmd
-        logger.info("Fetching flanking sequences from reference...")
-        sequences = self._fetch_sequences_batch(coordinates, reference)
+        # Step 2: Fetch short sequences for BLAST (±50bp, used to find homeologs)
+        logger.info("Fetching short flanking sequences for homeolog search...")
+        sequences = self._fetch_sequences(self._coordinates, reference, flank=50)
         
         # Step 3: Create SNP objects
         self.snps = []
-        for coord in coordinates:
+        for coord in self._coordinates:
             seq = sequences.get(coord['name'])
             if not seq:
                 logger.warning(f"No sequence retrieved for {coord['name']}, skipping")
@@ -305,14 +305,72 @@ class PolymarkerParser:
         
         logger.info(f"Successfully created {len(self.snps)} SNP objects")
         return self.snps
-    
-    def _fetch_sequences_batch(self, coordinates: List[dict], reference: Path) -> dict:
+
+    def fetch_target_flanking(self, reference: Path, flanking_size: int = 500):
+        """
+        Directly extract target flanking regions from known coordinates.
+
+        This skips the BLAST→re-extract cycle for the target chromosome.
+        Must be called after parse_coordinates().
+
+        Args:
+            reference: Path to BLAST database
+            flanking_size: bp to extract on each side of the SNP
+
+        Returns:
+            Tuple of (target_regions, target_sequences):
+                target_regions: dict mapping snp_name -> FlankingRegion
+                target_sequences: dict mapping seq_id -> sequence string
+        """
+        from ..models import FlankingRegion, Strand
+
+        if not hasattr(self, '_coordinates') or not self._coordinates:
+            raise ParseError("No coordinates available. Run parse_coordinates() first.")
+
+        logger.info(f"Directly extracting ±{flanking_size}bp target flanking from known coordinates...")
+
+        # Fetch long flanking sequences
+        sequences = self._fetch_sequences(self._coordinates, reference, flank=flanking_size)
+
+        target_regions = {}
+        target_sequences = {}
+
+        for coord in self._coordinates:
+            seq = sequences.get(coord['name'])
+            if not seq:
+                logger.warning(f"No target flanking for {coord['name']}, skipping")
+                continue
+
+            snp_pos_in_region = min(flanking_size, coord['pos'] - 1) + 1  # 1-based
+            genomic_start = max(1, coord['pos'] - flanking_size)
+
+            region = FlankingRegion(
+                snp_name=coord['name'],
+                chromosome=coord['chrom'],
+                start=genomic_start,
+                end=coord['pos'] + flanking_size,
+                strand=Strand.PLUS,
+                snp_position_in_region=snp_pos_in_region,
+                allele=coord['ref'],
+            )
+
+            # Sequence ID matching the format used by FlankingExtractor
+            seq_id = f"{region.snp_name}_{region.chromosome}_{region.allele}_{region.snp_position_in_region}"
+
+            target_regions[coord['name']] = region
+            target_sequences[seq_id] = seq
+
+        logger.info(f"Extracted {len(target_regions)} target flanking regions")
+        return target_regions, target_sequences
+
+    def _fetch_sequences(self, coordinates: list, reference: Path, flank: int = 50) -> dict:
         """
         Fetch sequences from BLAST database using blastdbcmd.
         
         Args:
             coordinates: List of coordinate dictionaries
             reference: Path to BLAST database
+            flank: Number of bp to extract on each side of position
             
         Returns:
             Dictionary mapping SNP names to sequences
@@ -321,9 +379,8 @@ class PolymarkerParser:
         
         for coord in coordinates:
             try:
-                # Fetch 50bp upstream and downstream
-                start = max(1, coord['pos'] - 50)
-                end = coord['pos'] + 50
+                start = max(1, coord['pos'] - flank)
+                end = coord['pos'] + flank
                 
                 cmd = [
                     "blastdbcmd",

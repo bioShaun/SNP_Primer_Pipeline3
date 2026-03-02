@@ -72,12 +72,25 @@ def run_pipeline(config: PipelineConfig) -> None:
             logger.warning("No valid SNPs found in input file")
             return
 
-        # Step 2: Convert to FASTA for BLAST
+        # Step 2: Convert to FASTA for BLAST (short seq for homeolog search)
         logger.info("Step 2: Converting to FASTA format...")
         fasta_file = config.output_dir / "for_blast.fa"
         parser.to_fasta(fasta_file)
 
-        # Step 3: Run BLAST
+        # For coordinate input, directly extract target flanking (skip BLAST for target)
+        target_regions_direct = {}
+        target_sequences_direct = {}
+        exclude_chromosomes = None
+
+        if input_format == "coordinates":
+            logger.info("Step 2b: Directly extracting target flanking from coordinates...")
+            target_regions_direct, target_sequences_direct = parser.fetch_target_flanking(
+                config.reference_file, config.flanking_size
+            )
+            # Build exclude map: snp_name -> target chromosome
+            exclude_chromosomes = {snp.name: snp.chromosome for snp in snps}
+
+        # Step 3: Run BLAST (finds homeologs on other chromosomes)
         logger.info("Step 3: Running BLAST search...")
         blast_runner = BlastRunner(config.reference_file, config.threads)
         blast_output = config.output_dir / "blast_out.txt"
@@ -88,7 +101,7 @@ def run_pipeline(config: PipelineConfig) -> None:
         blast_parser = BlastParser(blast_output)
         blast_hits = blast_parser.parse()
 
-        # Step 5: Extract flanking regions
+        # Step 5: Extract flanking regions (homeologs only for coordinate input)
         logger.info("Step 5: Extracting flanking regions...")
         flanking_extractor = FlankingExtractor(config.reference_file)
 
@@ -96,12 +109,13 @@ def run_pipeline(config: PipelineConfig) -> None:
         snp_positions = {snp.name: snp.snp_position for snp in snps}
 
         flanking_regions = flanking_extractor.extract_flanking_regions(
-            blast_hits, snp_positions, config.flanking_size, config.max_hits
+            blast_hits, snp_positions, config.flanking_size, config.max_hits,
+            exclude_chromosomes=exclude_chromosomes,
         )
 
-        logger.info(f"Extracted {len(flanking_regions)} flanking regions")
+        logger.info(f"Extracted {len(flanking_regions)} flanking regions from BLAST")
 
-        # Step 6: Extract sequences
+        # Step 6: Extract sequences and merge with direct target sequences
         logger.info("Step 6: Extracting flanking sequences...")
         flanking_fasta = config.output_dir / "flanking_sequences.fa"
         flanking_extractor.extract_sequences(flanking_regions, flanking_fasta)
@@ -124,6 +138,14 @@ def run_pipeline(config: PipelineConfig) -> None:
                         current_seq.append(line)
                 if current_id:
                     extracted_sequences[current_id] = "".join(current_seq)
+
+        # Merge direct target sequences (coordinate input)
+        if target_sequences_direct:
+            extracted_sequences.update(target_sequences_direct)
+            # Add direct target regions to flanking_regions (prepend for priority)
+            for snp_name, region in target_regions_direct.items():
+                flanking_regions.insert(0, region)
+            logger.info(f"Merged {len(target_sequences_direct)} direct target sequences")
 
         # Step 7: Process each SNP
         logger.info("Step 7: Processing SNPs for primer design...")

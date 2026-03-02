@@ -155,7 +155,8 @@ class FlankingExtractor:
         flanking_size: int = 500,
         max_hits: int = 6,
         min_identity: float = 88.0,
-        min_alignment_ratio: float = 0.9
+        min_alignment_ratio: float = 0.9,
+        exclude_chromosomes: Optional[Dict[str, str]] = None,
     ) -> List[FlankingRegion]:
         """
         Extract flanking regions from BLAST hits.
@@ -167,6 +168,8 @@ class FlankingExtractor:
             max_hits: Maximum number of hits per SNP
             min_identity: Minimum identity percentage
             min_alignment_ratio: Minimum alignment length ratio
+            exclude_chromosomes: Optional dict mapping snp_name -> chromosome
+                to exclude (for coordinate input, target already extracted)
             
         Returns:
             List of FlankingRegion objects
@@ -192,6 +195,11 @@ class FlankingExtractor:
             snp_pos_1based = snp_pos_0based + 1
             
             for hit in hits:
+                # Skip hits on excluded chromosomes (target already extracted)
+                if exclude_chromosomes and snp_name in exclude_chromosomes:
+                    if hit.subject_id == exclude_chromosomes[snp_name]:
+                        continue
+
                 # Calculate adjusted identity (accounting for gaps)
                 pct_identity = 100 - (hit.mismatches + hit.gap_opens) / hit.alignment_length * 100
                 
