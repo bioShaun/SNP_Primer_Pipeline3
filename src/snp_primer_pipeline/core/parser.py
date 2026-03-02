@@ -55,12 +55,14 @@ class PolymarkerParser:
                     if not line or line.startswith('#'):
                         continue
                     
-                    # Check for polymarker format (comma-separated with brackets)
-                    if ',' in line and '[' in line and ']' in line:
+                    # Dynamic split: if comma is present, split by comma; otherwise split by whitespace
+                    parts = [p.strip() for p in line.split(',')] if ',' in line else line.split()
+                    
+                    # Check for polymarker format (must contain brackets and have 3 fields)
+                    if '[' in line and ']' in line and len(parts) == 3:
                         return 'polymarker'
                     
-                    # Check for coordinate format (4 whitespace-separated fields)
-                    parts = line.split()
+                    # Check for coordinate format (4 fields)
                     if len(parts) == 4:
                         # Validate that position is numeric
                         try:
@@ -72,8 +74,8 @@ class PolymarkerParser:
                     # If first line doesn't match either format, it's an error
                     raise ParseError(
                         f"Unknown input format. Expected either:\n"
-                        f"  - Polymarker CSV: SNP_ID,Chromosome,Sequence[A/G]Sequence\n"
-                        f"  - Coordinates: Chromosome Position Ref Alt"
+                        f"  - Polymarker (CSV/Space/Tab): SNP_ID Chromosome Sequence[A/G]Sequence\n"
+                        f"  - Coordinates (CSV/Space/Tab): Chromosome Position Ref Alt"
                     )
         except IOError as e:
             raise ParseError(f"Failed to read input file: {e}")
@@ -120,13 +122,18 @@ class PolymarkerParser:
     
     def _parse_line(self, line: str, line_number: int) -> SNP | None:
         """Parse a single line of polymarker input."""
-        # Remove any spaces and split by comma
-        line = line.replace(" ", "")
-        parts = line.split(",")
+        # Split by comma if present, else by whitespace
+        if ',' in line:
+            parts = [p.strip() for p in line.split(',')]
+        else:
+            parts = line.split()
+            
+        # Remove internal spaces in strings if any (polymarker usually doesn't have internal spaces)
+        parts = [p.replace(" ", "") for p in parts]
         
         if len(parts) != 3:
             raise ParseError(
-                f"Expected 3 comma-separated fields, got {len(parts)}",
+                f"Expected 3 fields, got {len(parts)}",
                 line_number=line_number,
                 line_content=line
             )
@@ -228,7 +235,11 @@ class PolymarkerParser:
                     if not line or line.startswith('#'):
                         continue
                     
-                    parts = line.split()
+                    if ',' in line:
+                        parts = [p.strip() for p in line.split(',')]
+                    else:
+                        parts = line.split()
+                        
                     if len(parts) != 4:
                         logger.warning(f"Skipping line {line_number}: expected 4 fields, got {len(parts)}")
                         continue

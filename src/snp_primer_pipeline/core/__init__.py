@@ -4,6 +4,7 @@ from .parser import PolymarkerParser
 from .blast import BlastRunner, BlastParser, FlankingExtractor
 from .alignment import AlignedSequence, MultipleSequenceAlignment, MultipleSequenceAligner
 from .primer3_parser import Primer3Input, Primer3Runner, Primer3OutputParser
+from .specificity import SpecificityBlastRunner, SpecificityAssessor
 
 __all__ = [
     "PolymarkerParser",
@@ -15,5 +16,7 @@ __all__ = [
     "MultipleSequenceAligner",
     "Primer3Input",
     "Primer3Runner",
-    "Primer3OutputParser"
+    "Primer3OutputParser",
+    "SpecificityBlastRunner",
+    "SpecificityAssessor",
 ]

@@ -32,6 +32,9 @@ class PipelineConfig:
     primer_product_size_range: Tuple[int, int] = (50, 250)
     log_level: str = "INFO"
     show_variant_sites: bool = False  # Hide variant sites by default for cleaner output
+    run_specificity: bool = True  # Run off-target specificity assessment
+    specificity_warning_threshold: int = 50  # Warning hit count threshold
+    specificity_target_window: int = 2000  # Target exclusion window (bp)
     
     def __post_init__(self):
         """Validate configuration after initialization."""

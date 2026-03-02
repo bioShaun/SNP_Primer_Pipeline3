@@ -598,7 +598,8 @@ class KASPDesigner:
         snp_name: str,
         output_file: Path,
         variant_sites: Optional[List[int]] = None,
-        show_variant_sites: bool = False
+        show_variant_sites: bool = False,
+        specificity_results: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Format and write KASP primer results to file (V2 compatible format).
@@ -608,26 +609,34 @@ class KASPDesigner:
             snp_name: SNP identifier
             output_file: Output file path
             variant_sites: List of variant sites for annotation
+            specificity_results: Optional dict mapping base_key -> SpecificityResult
         """
         if variant_sites is None:
             variant_sites = []
         
         try:
             with open(output_file, 'w') as f:
-                # Write header (V2 format)
+                # Write header (V2 format + specificity)
                 header = [
                     "index", "product_size", "type", "start", "end", 
                     "genomic_start", "genomic_end",
                     "variation number", "3'diffall", "length", "Tm", 
                     "GCcontent", "any", "3'", "end_stability", "hairpin", 
                     "primer_seq", "ReverseComplement", "penalty", 
-                    "compl_any", "compl_end", "score"
+                    "compl_any", "compl_end", "score", "specificity"
                 ]
                 f.write("\t".join(header) + "\n")
                 
                 # Write primer results
                 for result in kasp_results:
                     curr_snp_name = snp_name or result.get("snp_name", "Unknown")
+                    
+                    # Look up specificity for this primer set
+                    base_key = result['index'].rsplit('-', 2)[0]
+                    spec_status = "NA"
+                    if specificity_results and base_key in specificity_results:
+                        spec_status = specificity_results[base_key].status.value
+                    
                     line = "\t".join([
                         f"{curr_snp_name}-{result['index']}",
                         str(result['product_size']),
@@ -651,6 +660,7 @@ class KASPDesigner:
                         f"{result['compl_any']:.2f}" if isinstance(result['compl_any'], float) else str(result['compl_any']),
                         f"{result['compl_end']:.2f}" if isinstance(result['compl_end'], float) else str(result['compl_end']),
                         f"{result['score']:.2f}" if isinstance(result['score'], float) else str(result['score']),
+                        spec_status,
                     ])
                     f.write(line + "\n")
                 
@@ -667,7 +677,9 @@ class KASPDesigner:
         self,
         kasp_results: List[Dict[str, Any]],
         snp_name: str,
-        output_file: Path
+        output_file: Path,
+        specificity_results: Optional[Dict[str, Any]] = None,
+        best_primer_key: Optional[Any] = None,
     ) -> None:
         """
         Format and write simplified KASP primer summary (one line per primer set).
@@ -676,13 +688,16 @@ class KASPDesigner:
             kasp_results: List of KASP primer dictionaries from design_primers
             snp_name: SNP identifier
             output_file: Output file path
+            specificity_results: Optional dict mapping base_key -> SpecificityResult
+            best_primer_key: Optional base_key (str) or dict mapping snp_name -> base_key
         """
         try:
             with open(output_file, 'w') as f:
                 # Write header
                 header = [
                     "Index", "Allele_A", "Tm_A", "GC_A", "Allele_B", "Tm_B", "GC_B", 
-                    "Common", "Tm_C", "GC_C", "Product_Size", "Genomic_Range", "Score"
+                    "Common", "Tm_C", "GC_C", "Product_Size", "Genomic_Range", "Score",
+                    "Specificity", "Best_Primer"
                 ]
                 f.write("\t".join(header) + "\n")
                 
@@ -706,6 +721,17 @@ class KASPDesigner:
                     else:
                         genomic_range = "NA"
                     
+                    # Specificity status
+                    spec_status = "NA"
+                    if specificity_results and base_index in specificity_results:
+                        spec_status = specificity_results[base_index].status.value
+                    
+                    # Best primer flag
+                    if isinstance(best_primer_key, dict):
+                        is_best = "YES" if best_primer_key.get(curr_snp_name) == base_index else "NO"
+                    else:
+                        is_best = "YES" if best_primer_key == base_index else "NO"
+                    
                     # Write single-line summary
                     line = "\t".join([
                         f"{curr_snp_name}-{base_index}",
@@ -720,7 +746,9 @@ class KASPDesigner:
                         f"{common['gc_percent']:.1f}",
                         str(allele_a['product_size']),
                         genomic_range,
-                        f"{allele_a['score']:.2f}" if isinstance(allele_a['score'], float) else str(allele_a['score'])
+                        f"{allele_a['score']:.2f}" if isinstance(allele_a['score'], float) else str(allele_a['score']),
+                        spec_status,
+                        is_best,
                     ])
                     f.write(line + "\n")
                     

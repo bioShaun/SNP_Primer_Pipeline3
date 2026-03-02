@@ -15,6 +15,7 @@ from .config import PipelineConfig, SoftwarePaths
 from .core.parser import PolymarkerParser
 from .core.blast import BlastRunner, BlastParser, FlankingExtractor
 from .core.alignment import MultipleSequenceAligner
+from .core.specificity import SpecificityBlastRunner, SpecificityAssessor
 from .primers.kasp import KASPDesigner
 from .primers.caps import CAPSDesigner
 from .exceptions import PipelineError, ParseError, BlastError, AlignmentError, PrimerDesignError
@@ -136,6 +137,8 @@ def run_pipeline(config: PipelineConfig) -> None:
 
         # Process each SNP
         all_kasp_results = []
+        all_specificity_results = {}
+        all_best_primer_keys = {}
         for snp in snps:
             if snp.name not in snp_regions:
                 logger.warning(f"No flanking regions found for SNP {snp.name}")
@@ -150,6 +153,10 @@ def run_pipeline(config: PipelineConfig) -> None:
                     for r in results["kasp"]:
                         r["snp_name"] = snp.name
                     all_kasp_results.extend(results["kasp"])
+                    if results.get("specificity"):
+                        all_specificity_results.update(results["specificity"])
+                    if results.get("best_primer_key"):
+                        all_best_primer_keys[snp.name] = results["best_primer_key"]
             except Exception as e:
                 logger.error(f"Failed to process SNP {snp.name}: {e}")
                 continue
@@ -166,18 +173,19 @@ def run_pipeline(config: PipelineConfig) -> None:
             merged_complete = config.output_dir / "all_KASP_primers.txt"
             merged_simple = config.output_dir / "all_KASP_primers_summary.txt"
 
-            # For merged output, we handle snp_name internally in results
-            # We need to slightly adjust format_output and format_simple_output
-            # or just use a helper to format them here.
-            # Actually, I'll modify format_output in kasp.py to optionally use snp_name from result.
             kasp_designer.format_output(
                 all_kasp_results,
                 "",
                 merged_complete,
                 None,
-                show_variant_sites=False,  # Footer doesn't make sense for merged
+                show_variant_sites=False,
+                specificity_results=all_specificity_results if all_specificity_results else None,
             )
-            kasp_designer.format_simple_output(all_kasp_results, "", merged_simple)
+            kasp_designer.format_simple_output(
+                all_kasp_results, "", merged_simple,
+                specificity_results=all_specificity_results if all_specificity_results else None,
+                best_primer_key=all_best_primer_keys if all_best_primer_keys else None,
+            )
 
         logger.info("Pipeline completed successfully")
 
@@ -272,6 +280,8 @@ def process_snp(
             logger.warning(f"Alignment failed for SNP {snp.name}: {e}")
 
     # Design KASP primers
+    specificity_results = None
+    best_primer_key = None
     if config.design_kasp:
         try:
             logger.info(f"Designing KASP primers for {snp.name}")
@@ -296,6 +306,48 @@ def process_snp(
                 genomic_strand=genomic_strand,
             )
 
+            # Step 7.5: Specificity assessment
+            if config.run_specificity and kasp_primers:
+                try:
+                    logger.info(f"Assessing primer specificity for {snp.name}")
+                    spec_runner = SpecificityBlastRunner(
+                        config.reference_file, config.threads
+                    )
+                    primer_fasta = spec_runner.prepare_primer_fasta(
+                        kasp_primers, snp.name, snp_output_dir
+                    )
+                    if primer_fasta:
+                        spec_blast_out = snp_output_dir / f"specificity_blast_{snp.name}.tsv"
+                        spec_runner.run_blast(primer_fasta, spec_blast_out)
+
+                        assessor = SpecificityAssessor(
+                            target_window=config.specificity_target_window,
+                            warning_threshold=config.specificity_warning_threshold,
+                        )
+                        blast_hits = assessor.parse_blast_output(spec_blast_out)
+
+                        # Determine target chromosome from flanking regions
+                        target_chrom = flanking_regions[0].chromosome if flanking_regions else ""
+                        target_snp_genomic = genomic_start + target_snp_position if genomic_start else None
+
+                        specificity_results = assessor.assess(
+                            kasp_primers, blast_hits, snp.name,
+                            target_chrom, target_snp_genomic
+                        )
+                        best_primer_key = assessor.select_best(
+                            kasp_primers, specificity_results
+                        )
+
+                        for key, res in specificity_results.items():
+                            logger.info(
+                                f"  Primer set {key}: {res.status.value}"
+                                + (f" - {res.reason}" if res.reason else "")
+                            )
+                        if best_primer_key:
+                            logger.info(f"  Best primer set: {best_primer_key}")
+                except BlastError as e:
+                    logger.warning(f"Specificity assessment failed for {snp.name}: {e}")
+
             # Write KASP results
             kasp_output = snp_output_dir / f"KASP_primers_{snp.name}.txt"
             kasp_designer.format_output(
@@ -304,13 +356,20 @@ def process_snp(
                 kasp_output,
                 sites_diff_all,
                 show_variant_sites=config.show_variant_sites,
+                specificity_results=specificity_results,
             )
 
             # Write simplified summary
             kasp_summary = snp_output_dir / f"KASP_primers_{snp.name}_summary.txt"
-            kasp_designer.format_simple_output(kasp_primers, snp.name, kasp_summary)
+            kasp_designer.format_simple_output(
+                kasp_primers, snp.name, kasp_summary,
+                specificity_results=specificity_results,
+                best_primer_key=best_primer_key,
+            )
 
             results["kasp"] = kasp_primers
+            results["specificity"] = specificity_results
+            results["best_primer_key"] = best_primer_key
             logger.info(f"Designed {len(kasp_primers) // 3} KASP primer pairs for {snp.name}")
 
         except PrimerDesignError as e:
@@ -420,6 +479,19 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "--no-specificity",
+        action="store_true",
+        help="Skip off-target specificity assessment",
+    )
+
+    parser.add_argument(
+        "--specificity-warning-threshold",
+        type=int,
+        default=50,
+        help="Warning threshold for primer repeat hit count (default: 50)",
+    )
+
+    parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         default="INFO",
@@ -444,6 +516,8 @@ def main() -> None:
         pick_anyway=args.pick_anyway,
         threads=args.threads,
         show_variant_sites=args.show_variant_sites,
+        run_specificity=not args.no_specificity,
+        specificity_warning_threshold=args.specificity_warning_threshold,
     )
 
     try:

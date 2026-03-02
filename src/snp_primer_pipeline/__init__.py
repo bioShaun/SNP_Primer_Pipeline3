@@ -14,7 +14,8 @@ from .core import (
     PolymarkerParser,
     BlastRunner, BlastParser, FlankingExtractor,
     AlignedSequence, MultipleSequenceAlignment, MultipleSequenceAligner,
-    Primer3Input, Primer3Runner, Primer3OutputParser
+    Primer3Input, Primer3Runner, Primer3OutputParser,
+    SpecificityBlastRunner, SpecificityAssessor,
 )
 from .primers import KASPDesigner, CAPSDesigner
 from .main import run_pipeline, process_snp
@@ -40,6 +41,8 @@ __all__ = [
     "Primer3Input",
     "Primer3Runner",
     "Primer3OutputParser",
+    "SpecificityBlastRunner",
+    "SpecificityAssessor",
     "KASPDesigner",
     "CAPSDesigner",
     "run_pipeline",
