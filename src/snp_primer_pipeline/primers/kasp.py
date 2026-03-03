@@ -125,50 +125,89 @@ class KASPDesigner:
             template_sequence[snp_position + 1:]
         )
         
-        # If no homeologs found, use SNP-forced primers only
+        # Two-round design: try strict first, then relaxed if pick_anyway is True
+        # Round 1: Always strict (PRIMER_PICK_ANYWAY=0)
+        saved_pick_anyway = self.pick_anyway
+        self.pick_anyway = False
+
         if not variant_sites:
-            return self._design_primers_no_homeologs(
+            kasp_output = self._design_primers_no_homeologs(
                 modified_template, snp_position, snp_alleles, product_size_range, output_dir
             )
-        
-        # Generate Primer3 inputs for each variant site (V2 style)
+        else:
+            kasp_output = self._run_primer3_with_homeologs(
+                modified_template, snp_position, snp_alleles,
+                variant_sites, product_size_range, template_sequence
+            )
+
+        # Tag strict results
+        for r in kasp_output:
+            r['design_quality'] = 'STRICT'
+
+        # Round 2: If no strict results and pick_anyway was requested, retry relaxed
+        if not kasp_output and saved_pick_anyway:
+            self.pick_anyway = True
+
+            if not variant_sites:
+                kasp_output = self._design_primers_no_homeologs(
+                    modified_template, snp_position, snp_alleles, product_size_range, output_dir
+                )
+            else:
+                kasp_output = self._run_primer3_with_homeologs(
+                    modified_template, snp_position, snp_alleles,
+                    variant_sites, product_size_range, template_sequence
+                )
+
+            # Tag relaxed results
+            for r in kasp_output:
+                r['design_quality'] = 'RELAXED'
+
+        # Restore original setting
+        self.pick_anyway = saved_pick_anyway
+
+        return kasp_output
+
+    def _run_primer3_with_homeologs(
+        self,
+        modified_template: str,
+        snp_position: int,
+        snp_alleles: Tuple[str, str],
+        variant_sites: List[int],
+        product_size_range: Tuple[int, int],
+        template_sequence: str,
+    ) -> List[Dict[str, Any]]:
+        """Run Primer3 with homeolog variant sites and return formatted results."""
         primer3_inputs = self._generate_primer3_inputs_v2(
-            modified_template,
-            snp_position,
-            variant_sites,
-            product_size_range
+            modified_template, snp_position, variant_sites, product_size_range
         )
-        
+
         if not primer3_inputs:
             return []
-        
+
         # Run Primer3 and collect results
         raw_primer_pairs = {}
         for var_site, input_data in primer3_inputs:
             try:
                 output_string = self.primer3_runner.run_string(input_data)
                 results = self.primer3_parser.parse_string(output_string, num_pairs=1)
-                
+
                 for seq_id, pairs in results.items():
                     for pair in pairs:
                         if pair.product_size != 0:
-                            # Use var_site + 1 for 1-based naming (V2 style)
                             key = f"{var_site + 1}-0"
                             raw_primer_pairs[key] = (pair, var_site)
             except PrimerDesignError:
                 continue
-        
-        # Filter primer pairs (V2 style - check if common primer can differ all)
+
+        # Filter primer pairs
         final_primers = self._filter_primers_v2(
             raw_primer_pairs, snp_position, variant_sites, len(template_sequence)
         )
-        
+
         # Convert to V2 output format
-        kasp_output = self._convert_to_v2_format(
+        return self._convert_to_v2_format(
             final_primers, snp_position, snp_alleles, variant_sites
         )
-        
-        return kasp_output
     
     def _build_diffarray(
         self,
@@ -623,7 +662,8 @@ class KASPDesigner:
                     "variation number", "3'diffall", "length", "Tm", 
                     "GCcontent", "any", "3'", "end_stability", "hairpin", 
                     "primer_seq", "ReverseComplement", "penalty", 
-                    "compl_any", "compl_end", "score", "specificity"
+                    "compl_any", "compl_end", "score", "specificity",
+                    "design_quality"
                 ]
                 f.write("\t".join(header) + "\n")
                 
@@ -661,6 +701,7 @@ class KASPDesigner:
                         f"{result['compl_end']:.2f}" if isinstance(result['compl_end'], float) else str(result['compl_end']),
                         f"{result['score']:.2f}" if isinstance(result['score'], float) else str(result['score']),
                         spec_status,
+                        result.get('design_quality', 'NA'),
                     ])
                     f.write(line + "\n")
                 
@@ -697,7 +738,7 @@ class KASPDesigner:
                 header = [
                     "Index", "Allele_A", "Tm_A", "GC_A", "Allele_B", "Tm_B", "GC_B", 
                     "Common", "Tm_C", "GC_C", "Product_Size", "Genomic_Range", "Score",
-                    "Specificity", "Best_Primer"
+                    "Specificity", "Design_Quality", "Best_Primer"
                 ]
                 f.write("\t".join(header) + "\n")
                 
@@ -748,6 +789,7 @@ class KASPDesigner:
                         genomic_range,
                         f"{allele_a['score']:.2f}" if isinstance(allele_a['score'], float) else str(allele_a['score']),
                         spec_status,
+                        allele_a.get('design_quality', 'NA'),
                         is_best,
                     ])
                     f.write(line + "\n")
