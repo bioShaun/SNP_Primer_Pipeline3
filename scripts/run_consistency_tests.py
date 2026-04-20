@@ -5,6 +5,8 @@ Consistency test runner.
 Runs the complete consistency test suite and generates reports.
 """
 
+from __future__ import annotations
+
 import argparse
 import subprocess
 import sys

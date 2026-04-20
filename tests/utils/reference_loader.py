@@ -5,6 +5,8 @@ Reference data loader for consistency tests.
 Loads reference output data from test_data/v2_examples directory.
 """
 
+from __future__ import annotations
+
 import re
 from dataclasses import dataclass
 from pathlib import Path

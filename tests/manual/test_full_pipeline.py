@@ -10,6 +10,8 @@ alignments), this test runs the entire pipeline from input parsing through
 BLAST, flanking extraction, alignment, and primer design.
 """
 
+from __future__ import annotations
+
 import os
 import shutil
 import subprocess

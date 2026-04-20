@@ -3,6 +3,8 @@
 Inspect the output of the pipeline to verify correctness.
 """
 
+from __future__ import annotations
+
 import logging
 import sys
 from pathlib import Path

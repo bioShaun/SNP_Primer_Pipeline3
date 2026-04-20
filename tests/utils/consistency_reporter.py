@@ -5,6 +5,8 @@ Consistency reporter for generating test reports.
 Generates detailed reports of consistency test results.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from pathlib import Path
 from typing import Any

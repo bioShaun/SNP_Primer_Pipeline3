@@ -5,6 +5,8 @@ Output comparator for consistency tests.
 Compares V3 pipeline outputs with V2 reference data.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
 

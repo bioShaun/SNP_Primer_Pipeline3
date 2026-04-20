@@ -6,6 +6,8 @@ This script runs the V3 pipeline using the same input data as V2 examples
 and compares the outputs to verify consistency.
 """
 
+from __future__ import annotations
+
 import os
 import shutil
 import subprocess
