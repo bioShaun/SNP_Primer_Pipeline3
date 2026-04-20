@@ -8,18 +8,19 @@ and best primer selection using synthetic BLAST output.
 
 from __future__ import annotations
 
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import pytest
 
 from snp_primer_pipeline.core.specificity import (
-    parse_btop,
-    check_three_prime_match,
     OfftargetHit,
     SpecificityAssessor,
     SpecificityBlastRunner,
     SpecificityResult,
     SpecificityStatus,
+    check_three_prime_match,
+    parse_btop,
 )
 
 pytestmark = pytest.mark.unit
@@ -120,17 +121,30 @@ class TestSpecificityAssessor:
     def _make_kasp_results(self, base_key="1-0"):
         """Create minimal KASP result dicts (group of 3)."""
         return [
-            {"index": f"{base_key}-Allele-A", "primer_seq": "ACGTACGTACGTACGTACGT", "score": 5.0, "product_size": 100},
-            {"index": f"{base_key}-Allele-B", "primer_seq": "ACGTACGTACGTACGTACGA", "score": 5.0, "product_size": 100},
-            {"index": f"{base_key}-Common", "primer_seq": "TGCATGCATGCATGCATGCA", "score": 5.0, "product_size": 100},
+            {
+                "index": f"{base_key}-Allele-A",
+                "primer_seq": "ACGTACGTACGTACGTACGT",
+                "score": 5.0,
+                "product_size": 100,
+            },
+            {
+                "index": f"{base_key}-Allele-B",
+                "primer_seq": "ACGTACGTACGTACGTACGA",
+                "score": 5.0,
+                "product_size": 100,
+            },
+            {
+                "index": f"{base_key}-Common",
+                "primer_seq": "TGCATGCATGCATGCATGCA",
+                "score": 5.0,
+                "product_size": 100,
+            },
         ]
 
     def test_pass_no_hits(self):
         """No BLAST hits at all → PASS."""
         assessor = SpecificityAssessor()
-        results = assessor.assess(
-            self._make_kasp_results(), {}, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), {}, "SNP1", "chr1", 50000)
         assert "1-0" in results
         assert results["1-0"].status == SpecificityStatus.PASS
 
@@ -139,11 +153,11 @@ class TestSpecificityAssessor:
         assessor = SpecificityAssessor(target_window=2000)
         blast_hits = {
             "SNP1_1-0_F1": [self._make_hit(subject_id="chr1", sstart=50010, send=50029)],
-            "SNP1_1-0_R": [self._make_hit(query_id="SNP1_1-0_R", subject_id="chr1", sstart=50100, send=50081)],
+            "SNP1_1-0_R": [
+                self._make_hit(query_id="SNP1_1-0_R", subject_id="chr1", sstart=50100, send=50081)
+            ],
         }
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.PASS
 
     def test_fail_off_target_pair(self):
@@ -153,21 +167,29 @@ class TestSpecificityAssessor:
         blast_hits = {
             "SNP1_1-0_F1": [
                 self._make_hit(
-                    subject_id="chr2", sstart=5000, send=5019,
-                    pident=100.0, length=20, mismatch=0, btop="20"
+                    subject_id="chr2",
+                    sstart=5000,
+                    send=5019,
+                    pident=100.0,
+                    length=20,
+                    mismatch=0,
+                    btop="20",
                 )
             ],
             "SNP1_1-0_R": [
                 self._make_hit(
-                    query_id="SNP1_1-0_R", subject_id="chr2",
-                    sstart=5219, send=5200,  # reverse strand
-                    pident=100.0, length=20, mismatch=0, btop="20"
+                    query_id="SNP1_1-0_R",
+                    subject_id="chr2",
+                    sstart=5219,
+                    send=5200,  # reverse strand
+                    pident=100.0,
+                    length=20,
+                    mismatch=0,
+                    btop="20",
                 )
             ],
         }
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.FAIL
         assert len(results["1-0"].fail_details) > 0
 
@@ -177,62 +199,65 @@ class TestSpecificityAssessor:
         blast_hits = {
             "SNP1_1-0_F1": [
                 self._make_hit(
-                    subject_id="chr2", sstart=5000, send=5019,
-                    pident=90.0, length=20, mismatch=2,
-                    btop="18AG"  # mismatch at 3' end
+                    subject_id="chr2",
+                    sstart=5000,
+                    send=5019,
+                    pident=90.0,
+                    length=20,
+                    mismatch=2,
+                    btop="18AG",  # mismatch at 3' end
                 )
             ],
             "SNP1_1-0_R": [
                 self._make_hit(
-                    query_id="SNP1_1-0_R", subject_id="chr2",
-                    sstart=5219, send=5200,
-                    pident=100.0, length=20, mismatch=0, btop="20"
+                    query_id="SNP1_1-0_R",
+                    subject_id="chr2",
+                    sstart=5219,
+                    send=5200,
+                    pident=100.0,
+                    length=20,
+                    mismatch=0,
+                    btop="20",
                 )
             ],
         }
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.PASS
 
     def test_fail_blocked_by_distance(self):
         """Pair too far apart → should NOT fail (param C blocks)."""
         assessor = SpecificityAssessor()
         blast_hits = {
-            "SNP1_1-0_F1": [
-                self._make_hit(subject_id="chr2", sstart=5000, send=5019, btop="20")
-            ],
+            "SNP1_1-0_F1": [self._make_hit(subject_id="chr2", sstart=5000, send=5019, btop="20")],
             "SNP1_1-0_R": [
                 self._make_hit(
-                    query_id="SNP1_1-0_R", subject_id="chr2",
-                    sstart=8000, send=7981,  # >1000bp away
-                    btop="20"
+                    query_id="SNP1_1-0_R",
+                    subject_id="chr2",
+                    sstart=8000,
+                    send=7981,  # >1000bp away
+                    btop="20",
                 )
             ],
         }
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.PASS
 
     def test_fail_blocked_by_same_strand(self):
         """Both on same strand → should NOT fail (param D blocks)."""
         assessor = SpecificityAssessor()
         blast_hits = {
-            "SNP1_1-0_F1": [
-                self._make_hit(subject_id="chr2", sstart=5000, send=5019, btop="20")
-            ],
+            "SNP1_1-0_F1": [self._make_hit(subject_id="chr2", sstart=5000, send=5019, btop="20")],
             "SNP1_1-0_R": [
                 self._make_hit(
-                    query_id="SNP1_1-0_R", subject_id="chr2",
-                    sstart=5200, send=5219,  # same strand!
-                    btop="20"
+                    query_id="SNP1_1-0_R",
+                    subject_id="chr2",
+                    sstart=5200,
+                    send=5219,  # same strand!
+                    btop="20",
                 )
             ],
         }
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.PASS
 
     def test_warning_high_hit_count(self):
@@ -253,9 +278,7 @@ class TestSpecificityAssessor:
                 )
             )
         blast_hits = {"SNP1_1-0_F1": hits}
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.WARNING
 
     def test_warning_escalation_to_fail(self):
@@ -276,9 +299,7 @@ class TestSpecificityAssessor:
                 )
             )
         blast_hits = {"SNP1_1-0_F1": hits}
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.FAIL
 
     def test_target_exclusion(self):
@@ -300,9 +321,7 @@ class TestSpecificityAssessor:
                 )
             )
         blast_hits = {"SNP1_1-0_F1": hits}
-        results = assessor.assess(
-            self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000
-        )
+        results = assessor.assess(self._make_kasp_results(), blast_hits, "SNP1", "chr1", 50000)
         assert results["1-0"].status == SpecificityStatus.PASS
 
 
@@ -311,9 +330,24 @@ class TestBestPrimerSelection:
 
     def _make_kasp_results(self, base_key, score):
         return [
-            {"index": f"{base_key}-Allele-A", "primer_seq": "A" * 20, "score": score, "product_size": 100},
-            {"index": f"{base_key}-Allele-B", "primer_seq": "A" * 20, "score": score, "product_size": 100},
-            {"index": f"{base_key}-Common", "primer_seq": "A" * 20, "score": score, "product_size": 100},
+            {
+                "index": f"{base_key}-Allele-A",
+                "primer_seq": "A" * 20,
+                "score": score,
+                "product_size": 100,
+            },
+            {
+                "index": f"{base_key}-Allele-B",
+                "primer_seq": "A" * 20,
+                "score": score,
+                "product_size": 100,
+            },
+            {
+                "index": f"{base_key}-Common",
+                "primer_seq": "A" * 20,
+                "score": score,
+                "product_size": 100,
+            },
         ]
 
     def test_pass_beats_warning(self):
@@ -358,9 +392,24 @@ class TestSpecificityBlastRunner:
     def test_prepare_primer_fasta(self):
         """Test tail stripping and FASTA writing."""
         kasp = [
-            {"index": "1-0-Allele-A", "primer_seq": "GAAGGTGACCAAGTTCATGCTACGTACGTACGT", "score": 5.0, "product_size": 100},
-            {"index": "1-0-Allele-B", "primer_seq": "GAAGGTCGGAGTCAACGGATTACGTACGTACGA", "score": 5.0, "product_size": 100},
-            {"index": "1-0-Common", "primer_seq": "TGCATGCATGCATGCA", "score": 5.0, "product_size": 100},
+            {
+                "index": "1-0-Allele-A",
+                "primer_seq": "GAAGGTGACCAAGTTCATGCTACGTACGTACGT",
+                "score": 5.0,
+                "product_size": 100,
+            },
+            {
+                "index": "1-0-Allele-B",
+                "primer_seq": "GAAGGTCGGAGTCAACGGATTACGTACGTACGA",
+                "score": 5.0,
+                "product_size": 100,
+            },
+            {
+                "index": "1-0-Common",
+                "primer_seq": "TGCATGCATGCATGCA",
+                "score": 5.0,
+                "product_size": 100,
+            },
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
             runner = SpecificityBlastRunner(Path("/dummy/ref"), threads=1)

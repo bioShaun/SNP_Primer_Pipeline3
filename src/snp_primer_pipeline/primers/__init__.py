@@ -1,9 +1,8 @@
 """Primer design modules for SNP Primer Pipeline."""
 
-from .kasp import KASPDesigner
-from .caps import CAPSDesigner
+from __future__ import annotations
 
-__all__ = [
-    "KASPDesigner",
-    "CAPSDesigner"
-]
+from .caps import CAPSDesigner
+from .kasp import KASPDesigner
+
+__all__ = ["CAPSDesigner", "KASPDesigner"]
