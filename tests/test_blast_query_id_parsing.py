@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 
 from snp_primer_pipeline.core.blast import FlankingExtractor
+from snp_primer_pipeline.models import BlastHit
 
 pytestmark = pytest.mark.unit
-from snp_primer_pipeline.models import BlastHit
 
 
 def test_extract_flanking_regions_with_underscores_in_coordinate_query_id():

@@ -5,18 +5,19 @@ Module-level unit tests (imports, constructors, serialization).
 Formerly misnamed test_integration.py.
 """
 
-import pytest
-
-pytestmark = pytest.mark.unit
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from snp_primer_pipeline import (
-    PolymarkerParser, 
-    KASPDesigner, 
+    PolymarkerParser,
+    KASPDesigner,
     CAPSDesigner,
-    SNP
+    SNP,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_polymarker_parser_integration():
