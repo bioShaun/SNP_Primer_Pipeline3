@@ -6,6 +6,8 @@ This module handles KASP primer design using Primer3 and multiple sequence align
 Refactored to match V2 behavior exactly.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
 

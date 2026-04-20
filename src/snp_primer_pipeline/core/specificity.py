@@ -8,6 +8,8 @@ criteria based on 3' end anchoring, identity/coverage, amplicon distance,
 and primer orientation.
 """
 
+from __future__ import annotations
+
 import logging
 import subprocess
 from dataclasses import dataclass, field

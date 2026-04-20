@@ -5,6 +5,8 @@ for SNP genotyping in any species. This is a refactored version of
 SNP_Primer_Pipeline2 with improved architecture and testability.
 """
 
+from __future__ import annotations
+
 __version__ = "3.0.0"
 __author__ = "Junli Zhang, Claude Assistant"
 

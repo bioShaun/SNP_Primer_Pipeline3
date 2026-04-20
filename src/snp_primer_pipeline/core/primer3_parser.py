@@ -5,6 +5,8 @@ Primer3 interface module for SNP Primer Pipeline.
 This module handles Primer3 input generation, execution, and output parsing.
 """
 
+from __future__ import annotations
+
 import subprocess
 from pathlib import Path
 from typing import Any

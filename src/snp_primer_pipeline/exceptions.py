@@ -1,5 +1,7 @@
 """Custom exceptions for SNP primer pipeline."""
 
+from __future__ import annotations
+
 
 class PipelineError(Exception):
     """Base exception for all pipeline errors."""

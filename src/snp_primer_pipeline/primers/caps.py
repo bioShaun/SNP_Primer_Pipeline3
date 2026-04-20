@@ -5,6 +5,8 @@ CAPS/dCAPS primer design module for SNP Primer Pipeline.
 This module handles CAPS and dCAPS primer design using restriction enzymes.
 """
 
+from __future__ import annotations
+
 import re
 from pathlib import Path
 

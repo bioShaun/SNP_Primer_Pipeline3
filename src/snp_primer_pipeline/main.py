@@ -5,6 +5,8 @@ Main pipeline module for SNP Primer Pipeline.
 This module provides the main entry point and orchestrates the entire pipeline.
 """
 
+from __future__ import annotations
+
 import argparse
 import logging
 import sys

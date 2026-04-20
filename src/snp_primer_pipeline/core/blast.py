@@ -5,6 +5,8 @@ BLAST processing module for SNP Primer Pipeline.
 This module handles BLAST execution, result parsing, and flanking region extraction.
 """
 
+from __future__ import annotations
+
 import subprocess
 from collections import Counter
 from pathlib import Path

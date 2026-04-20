@@ -1,5 +1,7 @@
 """Core processing modules for SNP Primer Pipeline."""
 
+from __future__ import annotations
+
 from .alignment import AlignedSequence, MultipleSequenceAligner, MultipleSequenceAlignment
 from .blast import BlastParser, BlastRunner, FlankingExtractor
 from .parser import PolymarkerParser
