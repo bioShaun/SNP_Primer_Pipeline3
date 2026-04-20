@@ -3,6 +3,8 @@
 Shared fixtures for consistency tests.
 """
 
+from __future__ import annotations
+
 import pytest
 from pathlib import Path
 import tempfile

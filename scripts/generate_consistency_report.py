@@ -5,6 +5,8 @@ Comprehensive consistency report generator.
 Runs all consistency tests and generates detailed reports.
 """
 
+from __future__ import annotations
+
 import sys
 import subprocess
 import json

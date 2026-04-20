@@ -5,6 +5,8 @@ End-to-end integration tests for SNP Primer Pipeline.
 Tests the complete pipeline using example data.
 """
 
+from __future__ import annotations
+
 import pytest
 import tempfile
 import shutil

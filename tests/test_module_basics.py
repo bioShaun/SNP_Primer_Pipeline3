@@ -5,6 +5,8 @@ Module-level unit tests (imports, constructors, serialization).
 Formerly misnamed test_integration.py.
 """
 
+from __future__ import annotations
+
 import tempfile
 from pathlib import Path
 

@@ -5,6 +5,8 @@ Alignment consistency tests.
 Tests that V3 multiple sequence alignment produces the same results as V2.
 """
 
+from __future__ import annotations
+
 import pytest
 from pathlib import Path
 from typing import Dict, List
