@@ -5,12 +5,16 @@ CAPS primer design consistency tests.
 Tests that V3 CAPS primer design produces the same results as V2.
 """
 
+from __future__ import annotations
+
 import pytest
 from pathlib import Path
 from typing import Dict, List
 
 from ..utils.reference_loader import CAPSPrimerRecord
 from ..utils.output_comparator import ComparisonResult
+
+pytestmark = [pytest.mark.consistency, pytest.mark.smoke]
 
 
 class TestCAPSConsistency:

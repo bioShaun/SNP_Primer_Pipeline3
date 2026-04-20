@@ -5,11 +5,15 @@ Parser consistency tests.
 Tests that V3 parser produces the same output as V2 parser.
 """
 
+from __future__ import annotations
+
 import pytest
 from pathlib import Path
 from typing import Dict, List
 
 from ..utils.output_comparator import ComparisonResult
+
+pytestmark = [pytest.mark.consistency, pytest.mark.integration, pytest.mark.slow]
 
 
 class TestParserConsistency:

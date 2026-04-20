@@ -5,6 +5,8 @@ Multiple sequence alignment module for SNP Primer Pipeline.
 This module handles multiple sequence alignment and variant site identification.
 """
 
+from __future__ import annotations
+
 import subprocess
 import tempfile
 from pathlib import Path
@@ -565,7 +567,8 @@ class MultipleSequenceAligner:
             for name, seq in sequences.items():
                 tmp_input.write(f">{name}\n{seq}\n")
             tmp_input_path = Path(tmp_input.name)
-        
+
+        tmp_output_path: Path | None = None
         try:
             # Create temporary output file
             with tempfile.NamedTemporaryFile(mode='w', suffix='.fasta', delete=False) as tmp_output:
@@ -581,12 +584,17 @@ class MultipleSequenceAligner:
             return self._parse_alignment_file(tmp_output_path)
             
         finally:
-            # Clean up temporary files
+            # Clean up temporary files; each unlink is independent so that a
+            # failure to create one file does not leak the other.
             try:
                 tmp_input_path.unlink()
-                tmp_output_path.unlink()
-            except:
+            except OSError:
                 pass
+            if tmp_output_path is not None:
+                try:
+                    tmp_output_path.unlink()
+                except OSError:
+                    pass
     
     def align_file(self, fasta_file: Path, output_file: Path) -> MultipleSequenceAlignment:
         """

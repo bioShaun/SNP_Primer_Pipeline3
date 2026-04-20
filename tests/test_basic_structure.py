@@ -1,7 +1,12 @@
 """Basic tests to verify project structure."""
 
+from __future__ import annotations
+
 import pytest
 from pathlib import Path
+
+pytestmark = pytest.mark.unit
+
 
 def test_package_imports():
     """Test that basic package imports work."""

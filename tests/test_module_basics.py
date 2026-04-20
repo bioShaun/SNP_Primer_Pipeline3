@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
 """
-Module basics tests for SNP Primer Pipeline.
+Module-level unit tests (imports, constructors, serialization).
 
-These tests verify that the main components can be imported and initialized correctly.
+Formerly misnamed test_integration.py.
 """
 
-import pytest
+from __future__ import annotations
+
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from snp_primer_pipeline import (
-    PolymarkerParser, 
-    KASPDesigner, 
+    PolymarkerParser,
+    KASPDesigner,
     CAPSDesigner,
-    SNP
+    SNP,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_polymarker_parser_integration():

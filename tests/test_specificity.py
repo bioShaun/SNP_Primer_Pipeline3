@@ -6,6 +6,8 @@ Tests BTOP parsing, Fail/Warning/PASS logic, target exclusion,
 and best primer selection using synthetic BLAST output.
 """
 
+from __future__ import annotations
+
 import pytest
 from pathlib import Path
 import tempfile
@@ -19,6 +21,8 @@ from snp_primer_pipeline.core.specificity import (
     SpecificityResult,
     SpecificityStatus,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestBtopParsing:

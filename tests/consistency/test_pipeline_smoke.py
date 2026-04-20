@@ -6,6 +6,8 @@ Smoke checks that V3 pipeline components can be configured, imported, and
 produce basic consistent results with V2.
 """
 
+from __future__ import annotations
+
 import pytest
 from pathlib import Path
 from typing import Dict, List
@@ -13,6 +15,8 @@ import tempfile
 import shutil
 
 from ..utils.output_comparator import ComparisonResult
+
+pytestmark = [pytest.mark.consistency, pytest.mark.smoke]
 
 
 class TestPipelineSmoke:

@@ -1,7 +1,13 @@
+from __future__ import annotations
+
 from pathlib import Path
+
+import pytest
 
 from snp_primer_pipeline.core.blast import FlankingExtractor
 from snp_primer_pipeline.models import BlastHit
+
+pytestmark = pytest.mark.unit
 
 
 def test_extract_flanking_regions_with_underscores_in_coordinate_query_id():
