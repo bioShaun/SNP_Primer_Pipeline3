@@ -12,6 +12,8 @@ from typing import Dict, List
 from ..utils.reference_loader import BlastHitRecord
 from ..utils.output_comparator import ComparisonResult
 
+pytestmark = [pytest.mark.consistency, pytest.mark.smoke]
+
 
 class TestBlastConsistency:
     """Test BLAST consistency between V2 and V3."""

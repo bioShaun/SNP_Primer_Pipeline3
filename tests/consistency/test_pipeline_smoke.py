@@ -13,6 +13,8 @@ import shutil
 
 from ..utils.output_comparator import ComparisonResult
 
+pytestmark = [pytest.mark.consistency, pytest.mark.smoke]
+
 
 class TestE2EConsistency:
     """Test end-to-end pipeline consistency between V2 and V3."""

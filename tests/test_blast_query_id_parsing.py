@@ -1,6 +1,10 @@
 from pathlib import Path
 
+import pytest
+
 from snp_primer_pipeline.core.blast import FlankingExtractor
+
+pytestmark = pytest.mark.unit
 from snp_primer_pipeline.models import BlastHit
 
 

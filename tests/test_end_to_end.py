@@ -14,6 +14,8 @@ import logging
 from snp_primer_pipeline.config import PipelineConfig
 from snp_primer_pipeline.main import run_pipeline, setup_logging
 
+pytestmark = [pytest.mark.e2e, pytest.mark.slow]
+
 
 class TestEndToEnd:
     """End-to-end integration tests."""

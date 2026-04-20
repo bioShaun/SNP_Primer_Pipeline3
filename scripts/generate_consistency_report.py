@@ -28,7 +28,7 @@ def run_all_consistency_tests(output_dir: Path, verbose: bool = False) -> Dict[s
         ("Alignment Consistency", "test_alignment_consistency"),
         ("KASP Consistency", "test_kasp_consistency"),
         ("CAPS Consistency", "test_caps_consistency"),
-        ("End-to-End Consistency", "test_e2e_consistency"),
+        ("Pipeline Smoke", "test_pipeline_smoke"),
     ]
     
     results = {

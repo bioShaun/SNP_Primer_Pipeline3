@@ -18,7 +18,10 @@ from ..utils.consistency_reporter import ConsistencyReporter
 def examples_dir():
     examples_path = Path(__file__).parent.parent.parent / "test_data" / "v2_examples"
     if not examples_path.exists():
-        pytest.skip(f"SNP_Primer_Pipeline2 examples directory not found: {examples_path}")
+        pytest.fail(
+            f"Required consistency fixture directory missing: {examples_path}. "
+            "Install test_data/v2_examples or skip consistency tests explicitly."
+        )
     return examples_path
 
 

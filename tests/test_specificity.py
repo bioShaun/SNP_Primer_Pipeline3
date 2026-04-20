@@ -20,6 +20,8 @@ from snp_primer_pipeline.core.specificity import (
     SpecificityStatus,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestBtopParsing:
     """Test BTOP string parsing."""

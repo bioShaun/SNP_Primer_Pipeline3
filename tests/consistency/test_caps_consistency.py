@@ -12,6 +12,8 @@ from typing import Dict, List
 from ..utils.reference_loader import CAPSPrimerRecord
 from ..utils.output_comparator import ComparisonResult
 
+pytestmark = [pytest.mark.consistency, pytest.mark.smoke]
+
 
 class TestCAPSConsistency:
     """Test CAPS primer design consistency between V2 and V3."""

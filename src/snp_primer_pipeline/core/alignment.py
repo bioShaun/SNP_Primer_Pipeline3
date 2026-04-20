@@ -585,7 +585,7 @@ class MultipleSequenceAligner:
             try:
                 tmp_input_path.unlink()
                 tmp_output_path.unlink()
-            except:
+            except OSError:
                 pass
     
     def align_file(self, fasta_file: Path, output_file: Path) -> MultipleSequenceAlignment:

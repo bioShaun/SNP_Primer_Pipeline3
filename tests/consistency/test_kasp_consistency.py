@@ -12,6 +12,8 @@ from typing import Dict, List
 from ..utils.reference_loader import KASPPrimerRecord
 from ..utils.output_comparator import ComparisonResult
 
+pytestmark = [pytest.mark.consistency, pytest.mark.integration, pytest.mark.slow]
+
 
 class TestKASPConsistency:
     """Test KASP primer design consistency between V2 and V3."""

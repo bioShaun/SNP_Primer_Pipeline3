@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Integration tests for SNP Primer Pipeline.
+Module-level unit tests (imports, constructors, serialization).
 
-These tests verify that the main components work together correctly.
+Formerly misnamed test_integration.py.
 """
 
 import pytest
+
+pytestmark = pytest.mark.unit
 import tempfile
 from pathlib import Path
 

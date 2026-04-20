@@ -3,6 +3,9 @@
 import pytest
 from pathlib import Path
 
+pytestmark = pytest.mark.unit
+
+
 def test_package_imports():
     """Test that basic package imports work."""
     from snp_primer_pipeline import __version__, PipelineConfig, SNP
