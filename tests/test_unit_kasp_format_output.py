@@ -214,6 +214,40 @@ def test_format_output_uses_specificity_by_base_key(designer: KASPDesigner, tmp_
         assert row[FULL_HEADER.index("specificity")] == "WARNING"
 
 
+def test_format_output_specificity_with_hyphenated_base_key(
+    designer: KASPDesigner, tmp_path: Path
+) -> None:
+    """Regression: Common entries with hyphenated base keys (e.g. ``151-0``)
+    must still resolve to the correct specificity row.
+
+    The production pipeline emits keys like ``151-0-Allele-A`` (from
+    ``_run_primer3_with_homeologs``) and ``left-0-Common`` (from
+    ``_design_primers_no_homeologs``). A naïve ``rsplit("-", 2)[0]`` strips
+    three components and drops half of the hyphenated base key for ``-Common``
+    rows, surfacing ``"NA"`` instead of the real status.
+    """
+    out = tmp_path / "kasp.tsv"
+    a = _make_result(index="151-0-Allele-A", direction="LEFT")
+    b = _make_result(index="151-0-Allele-B", direction="LEFT")
+    c = _make_result(index="151-0-Common", direction="RIGHT")
+
+    spec_results = {
+        "151-0": SpecificityResult(status=SpecificityStatus.PASS, reason="unique on-target"),
+    }
+
+    designer.format_output(
+        [a, b, c],
+        snp_name="SNP1",
+        output_file=out,
+        specificity_results=spec_results,
+    )
+
+    rows = [line.split("\t") for line in out.read_text().splitlines()[1:]]
+    assert len(rows) == 3
+    for row in rows:
+        assert row[FULL_HEADER.index("specificity")] == "PASS"
+
+
 def test_format_output_variant_sites_block_emitted_only_when_requested(
     designer: KASPDesigner, tmp_path: Path
 ) -> None:

@@ -630,6 +630,23 @@ class KASPDesigner:
 
         return results
 
+    @staticmethod
+    def _extract_base_key(index: str) -> str:
+        """Strip the trailing ``-Allele-{X}`` or ``-Common`` suffix from a row index.
+
+        Row indices follow ``{base_key}-{suffix}`` where ``suffix`` is one of
+        ``Allele-{A}``, ``Allele-{B}`` or ``Common``. The Common suffix adds one
+        hyphen while the allele suffixes add two, so a naive ``rsplit("-", 2)``
+        mangles Common rows whose base_key itself contains hyphens (e.g.
+        ``151-0-Common`` → ``151``).
+        """
+        # Common suffix: exactly one trailing hyphenated component.
+        common_suffix = "-Common"
+        if index.endswith(common_suffix):
+            return index[: -len(common_suffix)]
+        # Allele suffix: two trailing hyphenated components (``Allele-{X}``).
+        return index.rsplit("-", 2)[0]
+
     def _reverse_complement(self, seq: str) -> str:
         """Get reverse complement of DNA sequence, preserving case."""
         complement = {
@@ -702,7 +719,7 @@ class KASPDesigner:
                     curr_snp_name = snp_name or result.get("snp_name", "Unknown")
 
                     # Look up specificity for this primer set
-                    base_key = result["index"].rsplit("-", 2)[0]
+                    base_key = self._extract_base_key(result["index"])
                     spec_status = "NA"
                     if specificity_results and base_key in specificity_results:
                         spec_status = specificity_results[base_key].status.value
@@ -811,7 +828,7 @@ class KASPDesigner:
                     curr_snp_name = snp_name or allele_a.get("snp_name", "Unknown")
 
                     # Extract base index (remove -Allele-X/-Common suffix)
-                    base_index = allele_a["index"].rsplit("-", 2)[0]
+                    base_index = self._extract_base_key(allele_a["index"])
 
                     # Format genomic range
                     if allele_a["genomic_start"] is not None:
