@@ -122,7 +122,7 @@ tests/
 │   ├── test_alignment_consistency.py   ✅ 6/6 passing
 │   ├── test_kasp_consistency.py        ⚠️ 5/7 passing
 │   ├── test_caps_consistency.py        ✅ 7/7 passing
-│   └── test_e2e_consistency.py         ✅ 5/5 passing
+│   └── test_pipeline_smoke.py           ✅ 5/5 passing
 └── utils/
     ├── reference_loader.py             ✅ Complete
     ├── output_comparator.py            ✅ Complete

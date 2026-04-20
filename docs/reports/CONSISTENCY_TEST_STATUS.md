@@ -71,7 +71,7 @@ This document tracks the progress of implementing a comprehensive consistency te
 - ✅ `test_alignment_consistency.py` - Multiple sequence alignment tests (5/6 passing, 1 skipped)
 - ✅ `test_kasp_consistency.py` - KASP primer design tests (5/7 passing, 1 skipped, 2 failing)
 - ✅ `test_caps_consistency.py` - CAPS primer design tests (7/7 passing)
-- ✅ `test_e2e_consistency.py` - End-to-end pipeline tests (5/5 passing)
+- ✅ `test_pipeline_smoke.py` - Pipeline smoke tests (5/5 passing)
 
 **Test Coverage:**
 - ✅ SNP name extraction and chromosome parsing
@@ -227,7 +227,7 @@ SNP_Primer_Pipeline3/
 │   │   ├── test_alignment_consistency.py  # ✅ 5/6 passing (1 skipped)
 │   │   ├── test_kasp_consistency.py       # ⚠️ 5/7 passing (1 skipped, 2 failing)
 │   │   ├── test_caps_consistency.py       # ✅ 7/7 passing
-│   │   └── test_e2e_consistency.py        # ✅ 5/5 passing
+│   │   └── test_pipeline_smoke.py          # ✅ 5/5 passing
 │   └── utils/
 │       ├── __init__.py
 │       ├── reference_loader.py            # ✅ Reference data loader
