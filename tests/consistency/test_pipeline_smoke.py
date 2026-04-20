@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-End-to-end consistency tests.
+Pipeline smoke tests.
 
-Tests that V3 complete pipeline produces the same results as V2.
+Smoke checks that V3 pipeline components can be configured, imported, and
+produce basic consistent results with V2.
 """
 
 import pytest
@@ -16,8 +17,8 @@ from ..utils.output_comparator import ComparisonResult
 pytestmark = [pytest.mark.consistency, pytest.mark.smoke]
 
 
-class TestE2EConsistency:
-    """Test end-to-end pipeline consistency between V2 and V3."""
+class TestPipelineSmoke:
+    """Smoke tests for pipeline consistency between V2 and V3."""
     
     def test_complete_kasp_pipeline(self, reference_kasp_data, reference_polymarker_input, 
                                    test_reference_db, comparator, reporter, tmp_path):
