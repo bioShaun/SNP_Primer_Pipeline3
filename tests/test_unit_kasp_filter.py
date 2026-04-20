@@ -51,7 +51,9 @@ def test_filter_primers_v2_empty_diffarray_keeps_all(designer: KASPDesigner) -> 
     )
     raw = {"31-0": (pp, 30)}
     designer.diffarray = {}
-    out = designer._filter_primers_v2(raw, snp_position=100, variant_sites=[30], template_length=250)
+    out = designer._filter_primers_v2(
+        raw, snp_position=100, variant_sites=[30], template_length=250
+    )
     assert "31-0" in out
 
 
@@ -86,11 +88,15 @@ def test_filter_primers_v2_diffarray_filters_when_min_sums_zero(designer: KASPDe
     raw = {"31-0": (pp, 30)}
     # Window around left 3' (end=35): rr uses range(max(35-9, 20), 36) -> 26..35
     designer.diffarray = {k: [0] for k in range(26, 36)}
-    out = designer._filter_primers_v2(raw, snp_position=100, variant_sites=[30], template_length=250)
+    out = designer._filter_primers_v2(
+        raw, snp_position=100, variant_sites=[30], template_length=250
+    )
     assert "31-0" not in out
 
 
-def test_filter_primers_v2_diffarray_keeps_when_all_homeologs_differ(designer: KASPDesigner) -> None:
+def test_filter_primers_v2_diffarray_keeps_when_all_homeologs_differ(
+    designer: KASPDesigner,
+) -> None:
     left = Primer(
         name="L",
         sequence="A" * 10,
@@ -120,5 +126,7 @@ def test_filter_primers_v2_diffarray_keeps_when_all_homeologs_differ(designer: K
     )
     raw = {"31-0": (pp, 30)}
     designer.diffarray = {k: [1] for k in range(26, 36)}
-    out = designer._filter_primers_v2(raw, snp_position=100, variant_sites=[30], template_length=250)
+    out = designer._filter_primers_v2(
+        raw, snp_position=100, variant_sites=[30], template_length=250
+    )
     assert "31-0" in out

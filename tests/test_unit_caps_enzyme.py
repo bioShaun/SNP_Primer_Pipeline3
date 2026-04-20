@@ -31,4 +31,3 @@ def test_test_enzyme_caps_different_cut_counts(designer: CAPSDesigner) -> None:
     mut = "gaattc" + "n" * 6 + "gaattt"
     out = designer._test_enzyme(enzyme, wild, mut, snp_position=6)
     assert out.caps is True
-

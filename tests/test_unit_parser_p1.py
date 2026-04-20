@@ -31,7 +31,9 @@ def test_detect_format_unknown_raises(tmp_path: Path) -> None:
         PolymarkerParser.detect_format(p)
 
 
-def test_parse_coordinates_with_mocked_fetch(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_parse_coordinates_with_mocked_fetch(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     inp = tmp_path / "coords.csv"
     inp.write_text("chr1,100,A,G\n")
     ref = tmp_path / "ref.fa"

@@ -13,7 +13,7 @@ import subprocess
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from ..exceptions import BlastError
 
@@ -39,8 +39,8 @@ class SpecificityResult:
 
     status: SpecificityStatus = SpecificityStatus.PASS
     reason: str = ""
-    fail_details: List[str] = field(default_factory=list)
-    warning_details: List[str] = field(default_factory=list)
+    fail_details: list[str] = field(default_factory=list)
+    warning_details: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -81,7 +81,7 @@ class OfftargetHit:
         return max(self.sstart, self.send)
 
 
-def parse_btop(btop: str) -> List:
+def parse_btop(btop: str) -> list:
     """
     Parse BTOP (Blast Traceback Operations) string into a list of operations.
 
@@ -121,7 +121,9 @@ def parse_btop(btop: str) -> List:
     return ops
 
 
-def check_three_prime_match(btop: str, query_start: int, query_end: int, qlen: int, n_bases: int = 2) -> bool:
+def check_three_prime_match(
+    btop: str, query_start: int, query_end: int, qlen: int, n_bases: int = 2
+) -> bool:
     """
     Check if the 3' end of the primer has 0 mismatches.
 
@@ -154,7 +156,7 @@ def check_three_prime_match(btop: str, query_start: int, query_end: int, qlen: i
             if op[0] == "-":
                 # Gap in query — does not consume a query position
                 continue
-            elif op[1] == "-":
+            if op[1] == "-":
                 # Gap in subject — consumes a query position
                 positions.append("gap")
             else:
@@ -189,10 +191,10 @@ class SpecificityBlastRunner:
 
     def prepare_primer_fasta(
         self,
-        kasp_results: List[Dict[str, Any]],
+        kasp_results: list[dict[str, Any]],
         snp_name: str,
         output_dir: Path,
-    ) -> Optional[Path]:
+    ) -> Path | None:
         """
         Strip FAM/HEX tails from KASP primers and write to FASTA.
 
@@ -228,7 +230,7 @@ class SpecificityBlastRunner:
                     # Strip FAM or HEX tail
                     for tail in [FAM_TAIL, HEX_TAIL]:
                         if seq.startswith(tail):
-                            seq = seq[len(tail):]
+                            seq = seq[len(tail) :]
                             break
                     primer_id = f"{snp_name}_{base_key}_{label}"
                     if primer_id not in written:
@@ -256,18 +258,30 @@ class SpecificityBlastRunner:
         """
         cmd = [
             "blastn",
-            "-task", "blastn-short",
-            "-query", str(query_fasta),
-            "-db", str(self.reference),
-            "-evalue", "1000",
-            "-word_size", "7",
-            "-dust", "no",
-            "-soft_masking", "false",
-            "-max_target_seqs", "10000",
-            "-max_hsps", "1",
-            "-outfmt", "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send qlen btop",
-            "-num_threads", str(self.threads),
-            "-out", str(output_file),
+            "-task",
+            "blastn-short",
+            "-query",
+            str(query_fasta),
+            "-db",
+            str(self.reference),
+            "-evalue",
+            "1000",
+            "-word_size",
+            "7",
+            "-dust",
+            "no",
+            "-soft_masking",
+            "false",
+            "-max_target_seqs",
+            "10000",
+            "-max_hsps",
+            "1",
+            "-outfmt",
+            "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send qlen btop",
+            "-num_threads",
+            str(self.threads),
+            "-out",
+            str(output_file),
         ]
 
         try:
@@ -294,7 +308,7 @@ class SpecificityAssessor:
         fail_identity: float = 85.0,
         fail_coverage: float = 0.85,
         fail_max_mismatch: int = 3,
-        fail_distance_range: Tuple[int, int] = (50, 1000),
+        fail_distance_range: tuple[int, int] = (50, 1000),
         fail_three_prime_bases: int = 2,
         warning_identity: float = 85.0,
         warning_coverage: float = 0.80,
@@ -309,19 +323,19 @@ class SpecificityAssessor:
         self.warning_identity = warning_identity
         self.warning_coverage = warning_coverage
 
-    def parse_blast_output(self, blast_file: Path) -> Dict[str, List[OfftargetHit]]:
+    def parse_blast_output(self, blast_file: Path) -> dict[str, list[OfftargetHit]]:
         """
         Parse blastn-short output into per-primer hit lists.
 
         Returns:
             Dict mapping primer_id -> list of OfftargetHit
         """
-        hits: Dict[str, List[OfftargetHit]] = {}
+        hits: dict[str, list[OfftargetHit]] = {}
 
         if not blast_file.exists():
             return hits
 
-        with open(blast_file, "r") as f:
+        with open(blast_file) as f:
             for line in f:
                 line = line.strip()
                 if not line or line.startswith("#"):
@@ -351,7 +365,7 @@ class SpecificityAssessor:
         return hits
 
     def _is_on_target(
-        self, hit: OfftargetHit, target_chrom: str, target_snp_pos: Optional[int]
+        self, hit: OfftargetHit, target_chrom: str, target_snp_pos: int | None
     ) -> bool:
         """Check if a hit falls within the target region."""
         if hit.subject_id != target_chrom:
@@ -379,9 +393,7 @@ class SpecificityAssessor:
 
         return True
 
-    def _check_fail_pair(
-        self, f_hit: OfftargetHit, r_hit: OfftargetHit
-    ) -> bool:
+    def _check_fail_pair(self, f_hit: OfftargetHit, r_hit: OfftargetHit) -> bool:
         """
         Check Fail criteria C + D for a pair of hits on the same contig.
 
@@ -425,9 +437,9 @@ class SpecificityAssessor:
 
     def _count_effective_hits(
         self,
-        hits: List[OfftargetHit],
+        hits: list[OfftargetHit],
         target_chrom: str,
-        target_snp_pos: Optional[int],
+        target_snp_pos: int | None,
     ) -> int:
         """Count effective hits for Warning assessment."""
         count = 0
@@ -440,12 +452,12 @@ class SpecificityAssessor:
 
     def assess(
         self,
-        kasp_results: List[Dict[str, Any]],
-        blast_hits: Dict[str, List[OfftargetHit]],
+        kasp_results: list[dict[str, Any]],
+        blast_hits: dict[str, list[OfftargetHit]],
         snp_name: str,
         target_chrom: str,
-        target_snp_pos: Optional[int] = None,
-    ) -> Dict[str, SpecificityResult]:
+        target_snp_pos: int | None = None,
+    ) -> dict[str, SpecificityResult]:
         """
         Assess specificity for all primer sets of a SNP.
 
@@ -459,7 +471,7 @@ class SpecificityAssessor:
         Returns:
             Dict mapping primer_set_base_key -> SpecificityResult
         """
-        results: Dict[str, SpecificityResult] = {}
+        results: dict[str, SpecificityResult] = {}
 
         for i in range(0, len(kasp_results), 3):
             if i + 2 >= len(kasp_results):
@@ -481,16 +493,14 @@ class SpecificityAssessor:
 
             r_hits_raw = blast_hits.get(r_primer_id, [])
             r_offtarget = [
-                h for h in r_hits_raw
-                if not self._is_on_target(h, target_chrom, target_snp_pos)
+                h for h in r_hits_raw if not self._is_on_target(h, target_chrom, target_snp_pos)
             ]
             r_qualified = [h for h in r_offtarget if self._check_fail_single_hit(h)]
 
             for f_id in f_primer_ids:
                 f_hits_raw = blast_hits.get(f_id, [])
                 f_offtarget = [
-                    h for h in f_hits_raw
-                    if not self._is_on_target(h, target_chrom, target_snp_pos)
+                    h for h in f_hits_raw if not self._is_on_target(h, target_chrom, target_snp_pos)
                 ]
                 f_qualified = [h for h in f_offtarget if self._check_fail_single_hit(h)]
 
@@ -505,7 +515,9 @@ class SpecificityAssessor:
 
             if result.fail_details:
                 result.status = SpecificityStatus.FAIL
-                result.reason = f"Off-target amplification detected ({len(result.fail_details)} site(s))"
+                result.reason = (
+                    f"Off-target amplification detected ({len(result.fail_details)} site(s))"
+                )
                 results[base_key] = result
                 continue
 
@@ -539,9 +551,9 @@ class SpecificityAssessor:
 
     @staticmethod
     def select_best(
-        kasp_results: List[Dict[str, Any]],
-        specificity_results: Dict[str, SpecificityResult],
-    ) -> Optional[str]:
+        kasp_results: list[dict[str, Any]],
+        specificity_results: dict[str, SpecificityResult],
+    ) -> str | None:
         """
         Select the best primer set based on specificity + score.
 
@@ -550,7 +562,7 @@ class SpecificityAssessor:
         Returns:
             base_key of the best primer set, or None
         """
-        candidates: List[Tuple[int, float, str]] = []
+        candidates: list[tuple[int, float, str]] = []
 
         # Status priority: PASS=0, WARNING=1, FAIL=2
         status_priority = {
@@ -573,9 +585,7 @@ class SpecificityAssessor:
                     score = 0.0
 
             spec = specificity_results.get(base_key)
-            priority = status_priority.get(
-                spec.status if spec else SpecificityStatus.PASS, 0
-            )
+            priority = status_priority.get(spec.status if spec else SpecificityStatus.PASS, 0)
 
             # Lower priority number is better, higher score is better
             candidates.append((priority, -score, base_key))

@@ -5,20 +5,20 @@ Main pipeline module for SNP Primer Pipeline.
 This module provides the main entry point and orchestrates the entire pipeline.
 """
 
+import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional, Dict, Any
-import argparse
+from typing import Any
 
-from .config import PipelineConfig, SoftwarePaths
-from .core.parser import PolymarkerParser
-from .core.blast import BlastRunner, BlastParser, FlankingExtractor
+from .config import PipelineConfig
 from .core.alignment import MultipleSequenceAligner
-from .core.specificity import SpecificityBlastRunner, SpecificityAssessor
-from .primers.kasp import KASPDesigner
+from .core.blast import BlastParser, BlastRunner, FlankingExtractor
+from .core.parser import PolymarkerParser
+from .core.specificity import SpecificityAssessor, SpecificityBlastRunner
+from .exceptions import AlignmentError, BlastError, PipelineError, PrimerDesignError
 from .primers.caps import CAPSDesigner
-from .exceptions import PipelineError, ParseError, BlastError, AlignmentError, PrimerDesignError
+from .primers.kasp import KASPDesigner
 
 
 def setup_logging(log_level: str = "INFO") -> None:
@@ -44,7 +44,7 @@ def run_pipeline(config: PipelineConfig) -> None:
     # Create output directory
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
-    logger.info(f"Starting SNP Primer Pipeline")
+    logger.info("Starting SNP Primer Pipeline")
     logger.info(f"Input file: {config.input_file}")
     logger.info(f"Reference: {config.reference_file}")
     logger.info(f"Output directory: {config.output_dir}")
@@ -109,7 +109,10 @@ def run_pipeline(config: PipelineConfig) -> None:
         snp_positions = {snp.name: snp.snp_position for snp in snps}
 
         flanking_regions = flanking_extractor.extract_flanking_regions(
-            blast_hits, snp_positions, config.flanking_size, config.max_hits,
+            blast_hits,
+            snp_positions,
+            config.flanking_size,
+            config.max_hits,
             exclude_chromosomes=exclude_chromosomes,
         )
 
@@ -126,7 +129,7 @@ def run_pipeline(config: PipelineConfig) -> None:
         current_seq = []
 
         if flanking_fasta.exists():
-            with open(flanking_fasta, "r") as f:
+            with open(flanking_fasta) as f:
                 for line in f:
                     line = line.strip()
                     if line.startswith(">"):
@@ -151,7 +154,7 @@ def run_pipeline(config: PipelineConfig) -> None:
         logger.info("Step 7: Processing SNPs for primer design...")
 
         # Group flanking regions by SNP
-        snp_regions: Dict[str, List] = {}
+        snp_regions: dict[str, list] = {}
         for region in flanking_regions:
             if region.snp_name not in snp_regions:
                 snp_regions[region.snp_name] = []
@@ -204,7 +207,9 @@ def run_pipeline(config: PipelineConfig) -> None:
                 specificity_results=all_specificity_results if all_specificity_results else None,
             )
             kasp_designer.format_simple_output(
-                all_kasp_results, "", merged_simple,
+                all_kasp_results,
+                "",
+                merged_simple,
                 specificity_results=all_specificity_results if all_specificity_results else None,
                 best_primer_key=all_best_primer_keys if all_best_primer_keys else None,
             )
@@ -217,8 +222,8 @@ def run_pipeline(config: PipelineConfig) -> None:
 
 
 def process_snp(
-    snp, flanking_regions: List, extracted_sequences: Dict[str, str], config: PipelineConfig
-) -> Dict[str, List[Dict[str, Any]]]:
+    snp, flanking_regions: list, extracted_sequences: dict[str, str], config: PipelineConfig
+) -> dict[str, list[dict[str, Any]]]:
     """
     Process a single SNP for primer design.
 
@@ -275,9 +280,9 @@ def process_snp(
     # Perform multiple sequence alignment (only if we have multiple sequences)
     alignment = None
     target_name = None
-    sites_diff_all: List[int] = []
-    sites_diff_any: List[int] = []
-    diffarray: Dict[int, List[int]] = {}
+    sites_diff_all: list[int] = []
+    sites_diff_any: list[int] = []
+    diffarray: dict[int, list[int]] = {}
 
     if len(sequences) < 2:
         # No homeologs found - skip alignment, design primers using SNP position only
@@ -332,9 +337,7 @@ def process_snp(
             if config.run_specificity and kasp_primers:
                 try:
                     logger.info(f"Assessing primer specificity for {snp.name}")
-                    spec_runner = SpecificityBlastRunner(
-                        config.reference_file, config.threads
-                    )
+                    spec_runner = SpecificityBlastRunner(config.reference_file, config.threads)
                     primer_fasta = spec_runner.prepare_primer_fasta(
                         kasp_primers, snp.name, snp_output_dir
                     )
@@ -350,15 +353,14 @@ def process_snp(
 
                         # Determine target chromosome from flanking regions
                         target_chrom = flanking_regions[0].chromosome if flanking_regions else ""
-                        target_snp_genomic = genomic_start + target_snp_position if genomic_start else None
+                        target_snp_genomic = (
+                            genomic_start + target_snp_position if genomic_start else None
+                        )
 
                         specificity_results = assessor.assess(
-                            kasp_primers, blast_hits, snp.name,
-                            target_chrom, target_snp_genomic
+                            kasp_primers, blast_hits, snp.name, target_chrom, target_snp_genomic
                         )
-                        best_primer_key = assessor.select_best(
-                            kasp_primers, specificity_results
-                        )
+                        best_primer_key = assessor.select_best(kasp_primers, specificity_results)
 
                         for key, res in specificity_results.items():
                             logger.info(
@@ -384,7 +386,9 @@ def process_snp(
             # Write simplified summary
             kasp_summary = snp_output_dir / f"KASP_primers_{snp.name}_summary.txt"
             kasp_designer.format_simple_output(
-                kasp_primers, snp.name, kasp_summary,
+                kasp_primers,
+                snp.name,
+                kasp_summary,
                 specificity_results=specificity_results,
                 best_primer_key=best_primer_key,
             )
@@ -544,8 +548,8 @@ def main() -> None:
 
     try:
         run_pipeline(config)
-    except PipelineError as e:
-        logging.error(f"Pipeline failed: {e}")
+    except PipelineError:
+        logging.exception("Pipeline failed")
         sys.exit(1)
     except KeyboardInterrupt:
         logging.info("Pipeline interrupted by user")
