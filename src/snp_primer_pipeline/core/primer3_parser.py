@@ -9,10 +9,13 @@ from __future__ import annotations
 
 import subprocess
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 from ..exceptions import PrimerDesignError
 from ..models import Primer, PrimerPair
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 class Primer3Input:

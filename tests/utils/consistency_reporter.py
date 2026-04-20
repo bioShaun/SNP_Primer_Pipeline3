@@ -9,9 +9,12 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 from .output_comparator import ComparisonResult
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 class ConsistencyReporter:

@@ -13,7 +13,10 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 def run_all_consistency_tests(output_dir: Path, verbose: bool = False) -> dict[str, Any]:

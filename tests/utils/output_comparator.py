@@ -8,9 +8,12 @@ Compares V3 pipeline outputs with V2 reference data.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING
 
 from .reference_loader import BlastHitRecord, CAPSPrimerRecord, KASPPrimerRecord
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 @dataclass

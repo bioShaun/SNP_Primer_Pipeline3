@@ -9,12 +9,15 @@ Refactored to match V2 behavior exactly.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 from ..core.alignment import MultipleSequenceAlignment
 from ..core.primer3_parser import Primer3Input, Primer3OutputParser, Primer3Runner
 from ..exceptions import PrimerDesignError
 from ..models import Primer, PrimerPair
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 class KASPDesigner:

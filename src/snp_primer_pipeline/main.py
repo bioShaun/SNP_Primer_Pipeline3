@@ -11,7 +11,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 from .config import PipelineConfig
 from .core.alignment import MultipleSequenceAligner
@@ -21,6 +21,9 @@ from .core.specificity import SpecificityAssessor, SpecificityBlastRunner
 from .exceptions import AlignmentError, BlastError, PipelineError, PrimerDesignError
 from .primers.caps import CAPSDesigner
 from .primers.kasp import KASPDesigner
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 def setup_logging(log_level: str = "INFO") -> None:
