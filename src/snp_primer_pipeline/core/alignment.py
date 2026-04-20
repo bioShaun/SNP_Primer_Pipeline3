@@ -5,6 +5,8 @@ Multiple sequence alignment module for SNP Primer Pipeline.
 This module handles multiple sequence alignment and variant site identification.
 """
 
+from __future__ import annotations
+
 import subprocess
 import tempfile
 from pathlib import Path
