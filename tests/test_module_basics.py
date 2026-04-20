@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Integration tests for SNP Primer Pipeline.
+Module basics tests for SNP Primer Pipeline.
 
-These tests verify that the main components work together correctly.
+These tests verify that the main components can be imported and initialized correctly.
 """
 
 import pytest
