@@ -8,12 +8,15 @@ precision), or specificity/best-primer integration without failing a test.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 import pytest
 
 from snp_primer_pipeline.core.specificity import SpecificityResult, SpecificityStatus
 from snp_primer_pipeline.primers.kasp import KASPDesigner
+
+if TYPE_CHECKING:
+    from typing import Any
 
 pytestmark = pytest.mark.unit
 
