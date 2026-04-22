@@ -84,25 +84,25 @@ class TestKASPConsistency:
 
             if v3_primers:
                 # Validate primer structure
-                # v3_primers is a list of dictionaries (V2 format)
-                for i, p_dict in enumerate(v3_primers):
-                    index = p_dict.get("index", "")
-                    has_seq = len(p_dict.get("primer_seq", "")) > 0
-                    has_size = p_dict.get("product_size", 0) > 0
-                    tm = p_dict.get("tm", 0.0)
+                # v3_primers is a list of KASPResult instances (V2 format)
+                for i, p in enumerate(v3_primers):
+                    index = getattr(p, "index", "")
+                    has_seq = len(getattr(p, "primer_seq", "")) > 0
+                    has_size = getattr(p, "product_size", 0) > 0
+                    tm = getattr(p, "tm", 0.0)
 
                     results.extend(
                         [
                             ComparisonResult(
                                 field_name=f"KASP primer {i + 1} ({index}) has valid sequence",
                                 expected_value="non-empty sequence",
-                                actual_value=f"length {len(p_dict.get('primer_seq', ''))}",
+                                actual_value=f"length {len(getattr(p, 'primer_seq', ''))}",
                                 is_match=has_seq,
                             ),
                             ComparisonResult(
                                 field_name=f"KASP primer {i + 1} ({index}) has valid product size",
                                 expected_value="> 0",
-                                actual_value=p_dict.get("product_size", 0),
+                                actual_value=getattr(p, "product_size", 0),
                                 is_match=has_size,
                             ),
                             ComparisonResult(

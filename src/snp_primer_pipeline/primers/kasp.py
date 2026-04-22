@@ -8,16 +8,47 @@ Refactored to match V2 behavior exactly.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from ..core.alignment import MultipleSequenceAlignment
 from ..core.primer3_parser import Primer3Input, Primer3OutputParser, Primer3Runner
 from ..exceptions import PrimerDesignError
-from ..models import Primer, PrimerPair
+from ..models import Primer, PrimerPair, reverse_complement
 
 if TYPE_CHECKING:
     from typing import Any
+
+
+@dataclass
+class KASPResult:
+    """KASP primer design result (V2-compatible format)."""
+
+    index: str = ""
+    product_size: int = 0
+    direction: str = ""
+    start: int = 0
+    end: int = 0
+    diff_num: int = 0
+    diff_three_all: str = "NO"
+    length: int = 0
+    tm: float = 0.0
+    gc_percent: float = 0.0
+    self_any: float = 0.0
+    self_end: float = 0.0
+    end_stability: float = 0.0
+    hairpin: float = 0.0
+    primer_seq: str = ""
+    reverse_complement: str = ""
+    penalty: float = 0.0
+    compl_any: float = 0.0
+    compl_end: float = 0.0
+    score: float = 0.0
+    genomic_start: int | None = None
+    genomic_end: int | None = None
+    design_quality: str | None = None
+    snp_name: str | None = None
 
 
 class KASPDesigner:
@@ -46,7 +77,7 @@ class KASPDesigner:
         """
         # Auto-detect primer3 path if not provided
         if primer3_path is None:
-            from ..config import SoftwarePaths
+            from ..config import SoftwarePaths  # noqa: PLC0415
 
             software_paths = SoftwarePaths.auto_detect()
             primer3_path = software_paths.primer3_path
@@ -79,7 +110,7 @@ class KASPDesigner:
         external_diffarray: dict[int, list[int]] | None = None,
         genomic_start: int | None = None,
         genomic_strand: Any | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[KASPResult]:
         """
         Design KASP primers for a SNP (V2-compatible output).
 
@@ -146,7 +177,7 @@ class KASPDesigner:
 
         # Tag strict results
         for r in kasp_output:
-            r["design_quality"] = "STRICT"
+            r.design_quality = "STRICT"
 
         # Round 2: If no strict results and pick_anyway was requested, retry relaxed
         if not kasp_output and saved_pick_anyway:
@@ -168,7 +199,7 @@ class KASPDesigner:
 
             # Tag relaxed results
             for r in kasp_output:
-                r["design_quality"] = "RELAXED"
+                r.design_quality = "RELAXED"
 
         # Restore original setting
         self.pick_anyway = saved_pick_anyway
@@ -183,7 +214,7 @@ class KASPDesigner:
         variant_sites: list[int],
         product_size_range: tuple[int, int],
         template_sequence: str,
-    ) -> list[dict[str, Any]]:
+    ) -> list[KASPResult]:
         """Run Primer3 with homeolog variant sites and return formatted results."""
         primer3_inputs = self._generate_primer3_inputs_v2(
             modified_template, snp_position, variant_sites, product_size_range
@@ -199,7 +230,7 @@ class KASPDesigner:
                 output_string = self.primer3_runner.run_string(input_data)
                 results = self.primer3_parser.parse_string(output_string, num_pairs=1)
 
-                for seq_id, pairs in results.items():
+                for _seq_id, pairs in results.items():
                     for pair in pairs:
                         if pair.product_size != 0:
                             key = f"{var_site + 1}-0"
@@ -268,7 +299,7 @@ class KASPDesigner:
         Returns list of (var_site, input_string) tuples.
         """
         inputs = []
-        product_min, product_max = product_size_range
+        _product_min, product_max = product_size_range
 
         for var_site in variant_sites:
             if var_site == snp_position:
@@ -315,13 +346,13 @@ class KASPDesigner:
         snp_alleles: tuple[str, str],
         product_size_range: tuple[int, int],
         output_dir: Path | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[KASPResult]:
         """
         Design primers when no homeologs found (V2 style).
         Force primer ends at SNP position.
         """
         results = []
-        allele_a, allele_b = snp_alleles
+        _allele_a, _allele_b = snp_alleles
 
         # Generate inputs for left and right primers ending at SNP
         for direction in ["left", "right"]:
@@ -349,7 +380,7 @@ class KASPDesigner:
                 output_string = self.primer3_runner.run_string(p3_input.generate(direction))
                 parsed = self.primer3_parser.parse_string(output_string, num_pairs=5)
 
-                for seq_id, pairs in parsed.items():
+                for _seq_id, pairs in parsed.items():
                     for idx, pair in enumerate(pairs):
                         if pair.product_size == 0:
                             continue
@@ -420,15 +451,15 @@ class KASPDesigner:
 
                     if aa:
                         # Sum for each homeolog
-                        sums = [sum(x) for x in zip(*aa)]
+                        sums = [sum(x) for x in zip(*aa, strict=True)]
                         # Only keep if common primer can differ from all homeologs
                         if min(sums) > 0:
                             final_primers[key] = (pp, var_site)
                     else:
                         # No diffarray data, keep primer
                         final_primers[key] = (pp, var_site)
-                except Exception:
-                    # On any error, keep the primer
+                except (KeyError, ValueError):
+                    # On diffarray lookup/shape error, keep the primer
                     final_primers[key] = (pp, var_site)
             else:
                 # No diffarray, keep all primers
@@ -456,7 +487,7 @@ class KASPDesigner:
             # RIGHT: in v3, start < end where start is 3' end, end is 5' end
             range_start = primer.start
             range_end = primer.end
-            seq = self._reverse_complement(primer.sequence).lower()
+            seq = reverse_complement(primer.sequence).lower()
 
         # Find variant sites within primer range
         primer_range = set(range(range_start, range_end + 1))
@@ -471,7 +502,7 @@ class KASPDesigner:
         # Return in correct orientation for output
         if primer.direction == "LEFT":
             return seq
-        return self._reverse_complement(seq)
+        return reverse_complement(seq)
 
     def _count_variants_in_primer(self, primer: Primer, variant_sites: list[int]) -> int:
         """Count number of variant sites within primer region."""
@@ -488,15 +519,15 @@ class KASPDesigner:
         snp_position: int,
         snp_alleles: tuple[str, str],
         variant_sites: list[int],
-    ) -> list[dict[str, Any]]:
+    ) -> list[KASPResult]:
         """
         Convert filtered primers to V2 output format.
-        Returns list of dictionaries with V2-compatible fields.
+        Returns list of KASPResult instances with V2-compatible fields.
         """
         results = []
-        allele_a, allele_b = snp_alleles
+        _allele_a, _allele_b = snp_alleles
 
-        for key, (pp, var_site) in final_primers.items():
+        for key, (pp, _var_site) in final_primers.items():
             result = self._format_primer_pair_v2(pp, snp_position, snp_alleles, variant_sites, key)
             results.extend(result)
 
@@ -509,10 +540,10 @@ class KASPDesigner:
         snp_alleles: tuple[str, str],
         variant_sites: list[int],
         key: str,
-    ) -> list[dict[str, Any]]:
+    ) -> list[KASPResult]:
         """
         Format a single primer pair in V2 output format.
-        Returns list of 3 dictionaries: Allele-A, Allele-B, Common
+        Returns list of 3 KASPResult instances: Allele-A, Allele-B, Common
         """
         allele_a, allele_b = snp_alleles
         results = []
@@ -545,32 +576,32 @@ class KASPDesigner:
         # Otherwise: right is allele-specific
         if pl.end == snp_position:
             # Left is allele-specific, right is common
-            pA_seq = pl_seq_formatted[:-1] + allele_a
-            pB_seq = pl_seq_formatted[:-1] + allele_b
-            pC_seq = pr_seq_formatted
-            pA_primer = pl
-            pB_primer = pl
-            pC_primer = pr
-            pA_dir = "LEFT"
-            pB_dir = "LEFT"
-            pC_dir = "RIGHT"
+            pa_seq = pl_seq_formatted[:-1] + allele_a
+            pb_seq = pl_seq_formatted[:-1] + allele_b
+            pc_seq = pr_seq_formatted
+            pa_primer = pl
+            pb_primer = pl
+            pc_primer = pr
+            pa_dir = "LEFT"
+            pb_dir = "LEFT"
+            pc_dir = "RIGHT"
         else:
             # Right is allele-specific, left is common
-            pA_seq = pr_seq_formatted[:-1] + self._reverse_complement(allele_a)
-            pB_seq = pr_seq_formatted[:-1] + self._reverse_complement(allele_b)
-            pC_seq = pl_seq_formatted
-            pA_primer = pr
-            pB_primer = pr
-            pC_primer = pl
-            pA_dir = "RIGHT"
-            pB_dir = "RIGHT"
-            pC_dir = "LEFT"
+            pa_seq = pr_seq_formatted[:-1] + reverse_complement(allele_a)
+            pb_seq = pr_seq_formatted[:-1] + reverse_complement(allele_b)
+            pc_seq = pl_seq_formatted
+            pa_primer = pr
+            pb_primer = pr
+            pc_primer = pl
+            pa_dir = "RIGHT"
+            pb_dir = "RIGHT"
+            pc_dir = "LEFT"
 
         # Create output dictionaries (V2 format)
         for suffix, p_seq, primer, direction in [
-            (f"Allele-{allele_a}", pA_seq, pA_primer, pA_dir),
-            (f"Allele-{allele_b}", pB_seq, pB_primer, pB_dir),
-            ("Common", pC_seq, pC_primer, pC_dir),
+            (f"Allele-{allele_a}", pa_seq, pa_primer, pa_dir),
+            (f"Allele-{allele_b}", pb_seq, pb_primer, pb_dir),
+            ("Common", pc_seq, pc_primer, pc_dir),
         ]:
             # Determine start/end for output (V2 uses 1-based)
             # V2 format: LEFT start < end, RIGHT start > end
@@ -589,7 +620,7 @@ class KASPDesigner:
             genomic_start_out = None
             genomic_end_out = None
             if self._genomic_start is not None:
-                from ..models import Strand
+                from ..models import Strand  # noqa: PLC0415
 
                 # Template coordinates are 0-based, genomic are 1-based
                 if self._genomic_strand == Strand.PLUS:
@@ -602,30 +633,30 @@ class KASPDesigner:
                     genomic_end_out = self._genomic_start + (template_length - primer.start - 1)
 
             results.append(
-                {
-                    "index": f"{key}-{suffix}",
-                    "product_size": pp.product_size,
-                    "direction": direction,
-                    "start": start_out,
-                    "end": end_out,
-                    "genomic_start": genomic_start_out,
-                    "genomic_end": genomic_end_out,
-                    "diff_num": diff_num_from_seq,  # Count of uppercase chars = variant sites
-                    "diff_three_all": "YES" if primer.diff_three_all else "NO",
-                    "length": primer.length,
-                    "tm": primer.tm,
-                    "gc_percent": primer.gc_percent,
-                    "self_any": primer.self_any,
-                    "self_end": primer.self_end,
-                    "end_stability": primer.end_stability,
-                    "hairpin": primer.hairpin,
-                    "primer_seq": p_seq,
-                    "reverse_complement": self._reverse_complement(p_seq),
-                    "penalty": pp.penalty,
-                    "compl_any": pp.compl_any,
-                    "compl_end": pp.compl_end,
-                    "score": pp.score,
-                }
+                KASPResult(
+                    index=f"{key}-{suffix}",
+                    product_size=pp.product_size,
+                    direction=direction,
+                    start=start_out,
+                    end=end_out,
+                    genomic_start=genomic_start_out,
+                    genomic_end=genomic_end_out,
+                    diff_num=diff_num_from_seq,  # Count of uppercase chars = variant sites
+                    diff_three_all="YES" if primer.diff_three_all else "NO",
+                    length=primer.length,
+                    tm=primer.tm,
+                    gc_percent=primer.gc_percent,
+                    self_any=primer.self_any,
+                    self_end=primer.self_end,
+                    end_stability=primer.end_stability,
+                    hairpin=primer.hairpin,
+                    primer_seq=p_seq,
+                    reverse_complement=reverse_complement(p_seq),
+                    penalty=pp.penalty,
+                    compl_any=pp.compl_any,
+                    compl_end=pp.compl_end,
+                    score=pp.score,
+                )
             )
 
         return results
@@ -647,23 +678,9 @@ class KASPDesigner:
         # Allele suffix: two trailing hyphenated components (``Allele-{X}``).
         return index.rsplit("-", 2)[0]
 
-    def _reverse_complement(self, seq: str) -> str:
-        """Get reverse complement of DNA sequence, preserving case."""
-        complement = {
-            "A": "T",
-            "T": "A",
-            "G": "C",
-            "C": "G",
-            "a": "t",
-            "t": "a",
-            "g": "c",
-            "c": "g",
-        }
-        return "".join(complement.get(base, base) for base in reversed(seq))
-
     def format_output(
         self,
-        kasp_results: list[dict[str, Any]],
+        kasp_results: list[KASPResult],
         snp_name: str,
         output_file: Path,
         variant_sites: list[int] | None = None,
@@ -674,7 +691,7 @@ class KASPDesigner:
         Format and write KASP primer results to file (V2 compatible format).
 
         Args:
-            kasp_results: List of KASP primer dictionaries from design_primers
+            kasp_results: List of KASP primer results from design_primers
             snp_name: SNP identifier
             output_file: Output file path
             variant_sites: List of variant sites for annotation
@@ -716,52 +733,40 @@ class KASPDesigner:
 
                 # Write primer results
                 for result in kasp_results:
-                    curr_snp_name = snp_name or result.get("snp_name", "Unknown")
+                    curr_snp_name = snp_name or result.snp_name or "Unknown"
 
                     # Look up specificity for this primer set
-                    base_key = self._extract_base_key(result["index"])
+                    base_key = self._extract_base_key(result.index)
                     spec_status = "NA"
                     if specificity_results and base_key in specificity_results:
                         spec_status = specificity_results[base_key].status.value
 
                     line = "\t".join(
                         [
-                            f"{curr_snp_name}-{result['index']}",
-                            str(result["product_size"]),
-                            result["direction"],
-                            str(result["start"]),
-                            str(result["end"]),
-                            str(result["genomic_start"])
-                            if result["genomic_start"] is not None
-                            else "NA",
-                            str(result["genomic_end"])
-                            if result["genomic_end"] is not None
-                            else "NA",
-                            str(result["diff_num"]),
-                            result["diff_three_all"],
-                            str(result["length"]),
-                            f"{result['tm']:.2f}",
-                            f"{result['gc_percent']:.2f}",
-                            f"{result['self_any']:.2f}",
-                            f"{result['self_end']:.2f}",
-                            f"{result['end_stability']:.2f}",
-                            f"{result['hairpin']:.2f}",
-                            result["primer_seq"],
-                            result["reverse_complement"],
-                            f"{result['penalty']:.2f}"
-                            if isinstance(result["penalty"], float)
-                            else str(result["penalty"]),
-                            f"{result['compl_any']:.2f}"
-                            if isinstance(result["compl_any"], float)
-                            else str(result["compl_any"]),
-                            f"{result['compl_end']:.2f}"
-                            if isinstance(result["compl_end"], float)
-                            else str(result["compl_end"]),
-                            f"{result['score']:.2f}"
-                            if isinstance(result["score"], float)
-                            else str(result["score"]),
+                            f"{curr_snp_name}-{result.index}",
+                            str(result.product_size),
+                            result.direction,
+                            str(result.start),
+                            str(result.end),
+                            str(result.genomic_start) if result.genomic_start is not None else "NA",
+                            str(result.genomic_end) if result.genomic_end is not None else "NA",
+                            str(result.diff_num),
+                            result.diff_three_all,
+                            str(result.length),
+                            f"{result.tm:.2f}",
+                            f"{result.gc_percent:.2f}",
+                            f"{result.self_any:.2f}",
+                            f"{result.self_end:.2f}",
+                            f"{result.end_stability:.2f}",
+                            f"{result.hairpin:.2f}",
+                            result.primer_seq,
+                            result.reverse_complement,
+                            f"{result.penalty:.2f}",
+                            f"{result.compl_any:.2f}",
+                            f"{result.compl_end:.2f}",
+                            f"{result.score:.2f}",
                             spec_status,
-                            result.get("design_quality", "NA"),
+                            result.design_quality or "NA",
                         ]
                     )
                     f.write(line + "\n")
@@ -777,17 +782,17 @@ class KASPDesigner:
 
     def format_simple_output(
         self,
-        kasp_results: list[dict[str, Any]],
+        kasp_results: list[KASPResult],
         snp_name: str,
         output_file: Path,
         specificity_results: dict[str, Any] | None = None,
-        best_primer_key: Any | None = None,
+        best_primer_key: str | dict[str, str] | None = None,
     ) -> None:
         """
         Format and write simplified KASP primer summary (one line per primer set).
 
         Args:
-            kasp_results: List of KASP primer dictionaries from design_primers
+            kasp_results: List of KASP primer results from design_primers
             snp_name: SNP identifier
             output_file: Output file path
             specificity_results: Optional dict mapping base_key -> SpecificityResult
@@ -825,14 +830,14 @@ class KASPDesigner:
                     allele_b = kasp_results[i + 1]
                     common = kasp_results[i + 2]
 
-                    curr_snp_name = snp_name or allele_a.get("snp_name", "Unknown")
+                    curr_snp_name = snp_name or allele_a.snp_name or "Unknown"
 
                     # Extract base index (remove -Allele-X/-Common suffix)
-                    base_index = self._extract_base_key(allele_a["index"])
+                    base_index = self._extract_base_key(allele_a.index)
 
                     # Format genomic range
-                    if allele_a["genomic_start"] is not None:
-                        genomic_range = f"{allele_a['genomic_start']}-{common['genomic_end']}"
+                    if allele_a.genomic_start is not None:
+                        genomic_range = f"{allele_a.genomic_start}-{common.genomic_end}"
                     else:
                         genomic_range = "NA"
 
@@ -853,22 +858,20 @@ class KASPDesigner:
                     line = "\t".join(
                         [
                             f"{curr_snp_name}-{base_index}",
-                            allele_a["primer_seq"],
-                            f"{allele_a['tm']:.1f}",
-                            f"{allele_a['gc_percent']:.1f}",
-                            allele_b["primer_seq"],
-                            f"{allele_b['tm']:.1f}",
-                            f"{allele_b['gc_percent']:.1f}",
-                            common["primer_seq"],
-                            f"{common['tm']:.1f}",
-                            f"{common['gc_percent']:.1f}",
-                            str(allele_a["product_size"]),
+                            allele_a.primer_seq,
+                            f"{allele_a.tm:.1f}",
+                            f"{allele_a.gc_percent:.1f}",
+                            allele_b.primer_seq,
+                            f"{allele_b.tm:.1f}",
+                            f"{allele_b.gc_percent:.1f}",
+                            common.primer_seq,
+                            f"{common.tm:.1f}",
+                            f"{common.gc_percent:.1f}",
+                            str(allele_a.product_size),
                             genomic_range,
-                            f"{allele_a['score']:.2f}"
-                            if isinstance(allele_a["score"], float)
-                            else str(allele_a["score"]),
+                            f"{allele_a.score:.2f}",
                             spec_status,
-                            allele_a.get("design_quality", "NA"),
+                            allele_a.design_quality or "NA",
                             is_best,
                         ]
                     )
@@ -913,7 +916,7 @@ class KASPDesigner:
                 f"{primer.end_stability:.2f}",
                 f"{primer.hairpin:.2f}",
                 primer.sequence,
-                self._reverse_complement(primer.sequence),
+                reverse_complement(primer.sequence),
                 f"{penalty:.2f}",
                 f"{compl_any:.2f}",
                 f"{compl_end:.2f}",

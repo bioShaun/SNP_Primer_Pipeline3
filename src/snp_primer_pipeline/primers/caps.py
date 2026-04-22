@@ -12,17 +12,19 @@ from pathlib import Path
 
 from ..core.primer3_parser import Primer3Input, Primer3OutputParser, Primer3Runner
 from ..exceptions import PrimerDesignError
-from ..models import Primer, PrimerPair, RestrictionEnzyme
+from ..models import Primer, PrimerPair, RestrictionEnzyme, reverse_complement
 
 
 class CAPSDesigner:
     """CAPS/dCAPS primer designer."""
 
+    ENZYME_FILE_FIELD_COUNT = 2
+
     # IUPAC code mapping
-    IUPAC_MAP = {"R": "AG", "Y": "TC", "S": "GC", "W": "AT", "K": "TG", "M": "AC"}
+    IUPAC_MAP: dict[str, str] = {"R": "AG", "Y": "TC", "S": "GC", "W": "AT", "K": "TG", "M": "AC"}
 
     # IUPAC to regex pattern mapping
-    IUPAC_PATTERNS = {
+    IUPAC_PATTERNS: dict[str, str] = {
         "A": "A",
         "T": "T",
         "G": "G",
@@ -60,7 +62,16 @@ class CAPSDesigner:
             max_size: Maximum primer size
             pick_anyway: Pick primers anyway even if constraints violated
         """
-        self.primer3_runner = Primer3Runner(primer3_path, config_path)
+        # Auto-detect primer3 path if not provided (same strategy as KASPDesigner)
+        if primer3_path is None:
+            from ..config import SoftwarePaths  # noqa: PLC0415
+
+            software_paths = SoftwarePaths.auto_detect()
+            primer3_path = software_paths.primer3_path
+
+        # Don't pass config_path as settings_file - thermodynamic parameters
+        # are handled by Primer3Input (consistent with KASPDesigner)
+        self.primer3_runner = Primer3Runner(primer3_path, settings_file=None)
         self.primer3_parser = Primer3OutputParser()
         self.max_tm = max_tm
         self.max_size = max_size
@@ -78,13 +89,13 @@ class CAPSDesigner:
 
         try:
             with open(self.enzyme_file) as f:
-                for line in f:
-                    line = line.strip()
+                for raw_line in f:
+                    line = raw_line.strip()
                     if not line:
                         continue
 
                     parts = line.split("\t")
-                    if len(parts) != 2:
+                    if len(parts) != self.ENZYME_FILE_FIELD_COUNT:
                         continue
 
                     enzyme_info, sequence = parts
@@ -137,7 +148,7 @@ class CAPSDesigner:
         caps_enzymes = []
         dcaps_enzymes = []
 
-        for enzyme_name, enzyme in self.enzymes.items():
+        for _enzyme_name, enzyme in self.enzymes.items():
             if enzyme.price > max_price:
                 continue
 
@@ -161,7 +172,7 @@ class CAPSDesigner:
         )
 
         enzyme_seq = enzyme.sequence.lower()
-        enzyme_seq_rc = self._reverse_complement(enzyme_seq)
+        enzyme_seq_rc = reverse_complement(enzyme_seq)
 
         # Find all cutting positions in both sequences
         wild_positions = self._find_enzyme_sites(enzyme_seq, wild_seq)
@@ -180,9 +191,7 @@ class CAPSDesigner:
             return test_enzyme
 
         # Check for dCAPS (one base change can create/remove cut site)
-        test_enzyme = self._check_dcaps(test_enzyme, wild_seq, mut_seq, snp_position)
-
-        return test_enzyme
+        return self._check_dcaps(test_enzyme, wild_seq, mut_seq, snp_position)
 
     def _find_enzyme_sites(self, enzyme_seq: str, sequence: str) -> list[int]:
         """Find all positions where enzyme cuts in sequence."""
@@ -242,7 +251,7 @@ class CAPSDesigner:
                             return enzyme
 
         # Also try reverse complement
-        enzyme_seq_rc = self._reverse_complement(enzyme_seq)
+        enzyme_seq_rc = reverse_complement(enzyme_seq)
         if enzyme_seq_rc != enzyme_seq:
             enzyme.sequence = enzyme_seq_rc.upper()
             return self._check_dcaps(enzyme, wild_seq, mut_seq, snp_position)
@@ -251,13 +260,13 @@ class CAPSDesigner:
 
     def design_caps_primers(
         self,
-        template_sequence: str,
+        template_sequence: str,  # noqa: ARG002
         snp_position: int,
-        snp_alleles: tuple[str, str],
+        snp_alleles: tuple[str, str],  # noqa: ARG002
         enzyme: RestrictionEnzyme,
         product_size_range: tuple[int, int] = (300, 900),
         variant_sites: list[int] | None = None,
-        output_dir: Path | None = None,
+        output_dir: Path | None = None,  # noqa: ARG002
     ) -> list[PrimerPair]:
         """
         Design CAPS primers for a specific enzyme.
@@ -336,7 +345,7 @@ class CAPSDesigner:
                 output_string = self.primer3_runner.run_string(input_data)
                 results = self.primer3_parser.parse_string(output_string, num_pairs=1)
 
-                for seq_id, pairs in results.items():
+                for _seq_id, pairs in results.items():
                     primer_pairs.extend(pairs)
             except PrimerDesignError:
                 # Skip failed designs
@@ -373,42 +382,6 @@ class CAPSDesigner:
         p3_input.set_setting("PRIMER_NUM_RETURN", 5)
 
         return p3_input.generate(sequence_id)
-
-    def _reverse_complement(self, seq: str) -> str:
-        """Get reverse complement of DNA sequence."""
-        complement = {
-            "a": "t",
-            "t": "a",
-            "g": "c",
-            "c": "g",
-            "A": "T",
-            "T": "A",
-            "G": "C",
-            "C": "G",
-            "r": "y",
-            "y": "r",
-            "s": "s",
-            "w": "w",
-            "k": "m",
-            "m": "k",
-            "b": "v",
-            "v": "b",
-            "d": "h",
-            "h": "d",
-            "n": "n",
-            "R": "Y",
-            "Y": "R",
-            "S": "S",
-            "W": "W",
-            "K": "M",
-            "M": "K",
-            "B": "V",
-            "V": "B",
-            "D": "H",
-            "H": "D",
-            "N": "N",
-        }
-        return "".join(complement.get(base, base) for base in reversed(seq))
 
     def format_output(
         self,
@@ -540,7 +513,7 @@ class CAPSDesigner:
                 f"{primer.end_stability:.2f}",
                 f"{primer.hairpin:.2f}",
                 primer.sequence,
-                self._reverse_complement(primer.sequence),
+                reverse_complement(primer.sequence),
                 f"{penalty:.2f}",
                 f"{compl_any:.2f}",
                 f"{compl_end:.2f}",
