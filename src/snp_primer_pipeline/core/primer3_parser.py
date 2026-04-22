@@ -157,6 +157,25 @@ class Primer3Input:
         self.settings[key] = value
         return self
 
+    def apply_designer_settings(
+        self,
+        max_size: int,
+        max_tm: float,
+        pick_anyway: bool,
+    ) -> Primer3Input:
+        """Apply common designer settings shared by KASP and CAPS designers."""
+        self.set_setting("PRIMER_MAX_SIZE", max_size)
+        self.set_setting("PRIMER_MIN_TM", 57.0)
+        self.set_setting("PRIMER_OPT_TM", 60.0)
+        self.set_setting("PRIMER_MAX_TM", max_tm)
+        self.set_setting("PRIMER_PAIR_MAX_DIFF_TM", 6.0)
+        self.set_setting("PRIMER_FIRST_BASE_INDEX", 1)
+        self.set_setting("PRIMER_LIBERAL_BASE", 1)
+        self.set_setting("PRIMER_NUM_RETURN", 5)
+        self.set_setting("PRIMER_EXPLAIN_FLAG", 1)
+        self.set_setting("PRIMER_PICK_ANYWAY", 1 if pick_anyway else 0)
+        return self
+
     def generate(self, sequence_id: str) -> str:
         """
         Generate Primer3 input string.
