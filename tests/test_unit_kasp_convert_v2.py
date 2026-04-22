@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+from dataclasses import asdict
+
 from snp_primer_pipeline.models import Primer, PrimerPair, Strand
 from snp_primer_pipeline.primers.kasp import KASPDesigner
 
@@ -93,19 +95,19 @@ def test_format_pair_left_allele_specific(designer: KASPDesigner) -> None:
         pp, snp_position=snp_pos, snp_alleles=("A", "G"), variant_sites=[], key="31-0"
     )
     assert len(rows) == 3
-    assert "Allele-A" in rows[0]["index"]
-    assert "Allele-G" in rows[1]["index"]
-    assert "Common" in rows[2]["index"]
+    assert "Allele-A" in rows[0].index
+    assert "Allele-G" in rows[1].index
+    assert "Common" in rows[2].index
 
     # Allele-specific rows should be LEFT direction
-    assert rows[0]["direction"] == "LEFT"
-    assert rows[1]["direction"] == "LEFT"
+    assert rows[0].direction == "LEFT"
+    assert rows[1].direction == "LEFT"
     # Common should be RIGHT
-    assert rows[2]["direction"] == "RIGHT"
+    assert rows[2].direction == "RIGHT"
 
     # Allele-specific sequences should end with the respective allele
-    assert rows[0]["primer_seq"].endswith("A")
-    assert rows[1]["primer_seq"].endswith("G")
+    assert rows[0].primer_seq.endswith("A")
+    assert rows[1].primer_seq.endswith("G")
 
 
 def test_format_pair_right_allele_specific(designer: KASPDesigner) -> None:
@@ -116,10 +118,10 @@ def test_format_pair_right_allele_specific(designer: KASPDesigner) -> None:
         pp, snp_position=snp_pos, snp_alleles=("A", "G"), variant_sites=[], key="31-0"
     )
     # Allele-specific should be RIGHT direction
-    assert rows[0]["direction"] == "RIGHT"
-    assert rows[1]["direction"] == "RIGHT"
+    assert rows[0].direction == "RIGHT"
+    assert rows[1].direction == "RIGHT"
     # Common is LEFT
-    assert rows[2]["direction"] == "LEFT"
+    assert rows[2].direction == "LEFT"
 
 
 # ── coordinate format ────────────────────────────────────────────────
@@ -134,9 +136,9 @@ def test_format_pair_left_coords_1based(designer: KASPDesigner) -> None:
     # The Common row is RIGHT (since left.end == snp)
     # Allele rows are LEFT
     allele_row = rows[0]
-    assert allele_row["direction"] == "LEFT"
-    assert allele_row["start"] == 11  # 10 + 1
-    assert allele_row["end"] == 31  # 30 + 1
+    assert allele_row.direction == "LEFT"
+    assert allele_row.start == 11  # 10 + 1
+    assert allele_row.end == 31  # 30 + 1
 
 
 def test_format_pair_right_coords_swapped(designer: KASPDesigner) -> None:
@@ -146,9 +148,9 @@ def test_format_pair_right_coords_swapped(designer: KASPDesigner) -> None:
         pp, snp_position=30, snp_alleles=("A", "G"), variant_sites=[], key="31-0"
     )
     common_row = rows[2]  # Common is RIGHT
-    assert common_row["direction"] == "RIGHT"
-    assert common_row["start"] == 171  # end+1 (5' end, higher)
-    assert common_row["end"] == 151  # start+1 (3' end, lower)
+    assert common_row.direction == "RIGHT"
+    assert common_row.start == 171  # end+1 (5' end, higher)
+    assert common_row.end == 151  # start+1 (3' end, lower)
 
 
 # ── diff_three_all / diff_num ────────────────────────────────────────
@@ -161,7 +163,7 @@ def test_format_pair_diff_three_all_yes(designer: KASPDesigner) -> None:
     rows = designer._format_primer_pair_v2(
         pp, snp_position=50, snp_alleles=("A", "G"), variant_sites=[30], key="31-0"
     )
-    assert rows[0]["diff_three_all"] == "YES"
+    assert rows[0].diff_three_all == "YES"
 
 
 def test_format_pair_diff_three_all_no(designer: KASPDesigner) -> None:
@@ -170,7 +172,7 @@ def test_format_pair_diff_three_all_no(designer: KASPDesigner) -> None:
     rows = designer._format_primer_pair_v2(
         pp, snp_position=50, snp_alleles=("A", "G"), variant_sites=[99], key="31-0"
     )
-    assert rows[0]["diff_three_all"] == "NO"
+    assert rows[0].diff_three_all == "NO"
 
 
 def test_format_pair_invalid_key_diff_three_all_no(designer: KASPDesigner) -> None:
@@ -179,7 +181,7 @@ def test_format_pair_invalid_key_diff_three_all_no(designer: KASPDesigner) -> No
     rows = designer._format_primer_pair_v2(
         pp, snp_position=50, snp_alleles=("A", "G"), variant_sites=[30], key="bad-key"
     )
-    assert rows[0]["diff_three_all"] == "NO"
+    assert rows[0].diff_three_all == "NO"
 
 
 # ── genomic coordinates ──────────────────────────────────────────────
@@ -191,8 +193,8 @@ def test_format_pair_no_genomic_info(designer: KASPDesigner) -> None:
     rows = designer._format_primer_pair_v2(
         pp, snp_position=50, snp_alleles=("A", "G"), variant_sites=[], key="31-0"
     )
-    assert rows[0]["genomic_start"] is None
-    assert rows[0]["genomic_end"] is None
+    assert rows[0].genomic_start is None
+    assert rows[0].genomic_end is None
 
 
 def test_format_pair_genomic_plus_strand(designer: KASPDesigner) -> None:
@@ -204,8 +206,8 @@ def test_format_pair_genomic_plus_strand(designer: KASPDesigner) -> None:
         pp, snp_position=30, snp_alleles=("A", "G"), variant_sites=[], key="31-0"
     )
     # Allele row (LEFT direction)
-    assert rows[0]["genomic_start"] == 1010  # 1000 + 10
-    assert rows[0]["genomic_end"] == 1030  # 1000 + 30
+    assert rows[0].genomic_start == 1010  # 1000 + 10
+    assert rows[0].genomic_end == 1030  # 1000 + 30
 
 
 def test_format_pair_genomic_minus_strand(designer: KASPDesigner) -> None:
@@ -220,8 +222,8 @@ def test_format_pair_genomic_minus_strand(designer: KASPDesigner) -> None:
     # LEFT allele row: minus strand
     # genomic_start = 2000 + (200 - 30 - 1) = 2169
     # genomic_end = 2000 + (200 - 10 - 1) = 2189
-    assert rows[0]["genomic_start"] == 2169
-    assert rows[0]["genomic_end"] == 2189
+    assert rows[0].genomic_start == 2169
+    assert rows[0].genomic_end == 2189
 
 
 # ── output fields completeness ───────────────────────────────────────
@@ -256,9 +258,11 @@ def test_format_pair_all_expected_fields_present(designer: KASPDesigner) -> None
         "compl_any",
         "compl_end",
         "score",
+        "design_quality",
+        "snp_name",
     }
     for row in rows:
-        assert set(row.keys()) == expected_fields
+        assert set(asdict(row).keys()) == expected_fields
 
 
 def test_format_pair_penalty_propagated(designer: KASPDesigner) -> None:
@@ -268,6 +272,6 @@ def test_format_pair_penalty_propagated(designer: KASPDesigner) -> None:
         pp, snp_position=50, snp_alleles=("A", "G"), variant_sites=[], key="31-0"
     )
     for row in rows:
-        assert row["penalty"] == 1.5
-        assert row["compl_any"] == 0.1
-        assert row["compl_end"] == 0.2
+        assert row.penalty == 1.5
+        assert row.compl_any == 0.1
+        assert row.compl_end == 0.2

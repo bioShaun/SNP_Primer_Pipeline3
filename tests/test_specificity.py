@@ -22,6 +22,7 @@ from snp_primer_pipeline.core.specificity import (
     check_three_prime_match,
     parse_btop,
 )
+from snp_primer_pipeline.primers.kasp import KASPResult
 
 pytestmark = pytest.mark.unit
 
@@ -119,26 +120,26 @@ class TestSpecificityAssessor:
         return OfftargetHit(**defaults)
 
     def _make_kasp_results(self, base_key="1-0"):
-        """Create minimal KASP result dicts (group of 3)."""
+        """Create minimal KASPResult instances (group of 3)."""
         return [
-            {
-                "index": f"{base_key}-Allele-A",
-                "primer_seq": "ACGTACGTACGTACGTACGT",
-                "score": 5.0,
-                "product_size": 100,
-            },
-            {
-                "index": f"{base_key}-Allele-B",
-                "primer_seq": "ACGTACGTACGTACGTACGA",
-                "score": 5.0,
-                "product_size": 100,
-            },
-            {
-                "index": f"{base_key}-Common",
-                "primer_seq": "TGCATGCATGCATGCATGCA",
-                "score": 5.0,
-                "product_size": 100,
-            },
+            KASPResult(
+                index=f"{base_key}-Allele-A",
+                primer_seq="ACGTACGTACGTACGTACGT",
+                score=5.0,
+                product_size=100,
+            ),
+            KASPResult(
+                index=f"{base_key}-Allele-B",
+                primer_seq="ACGTACGTACGTACGTACGA",
+                score=5.0,
+                product_size=100,
+            ),
+            KASPResult(
+                index=f"{base_key}-Common",
+                primer_seq="TGCATGCATGCATGCATGCA",
+                score=5.0,
+                product_size=100,
+            ),
         ]
 
     def test_pass_no_hits(self):
@@ -330,24 +331,24 @@ class TestBestPrimerSelection:
 
     def _make_kasp_results(self, base_key, score):
         return [
-            {
-                "index": f"{base_key}-Allele-A",
-                "primer_seq": "A" * 20,
-                "score": score,
-                "product_size": 100,
-            },
-            {
-                "index": f"{base_key}-Allele-B",
-                "primer_seq": "A" * 20,
-                "score": score,
-                "product_size": 100,
-            },
-            {
-                "index": f"{base_key}-Common",
-                "primer_seq": "A" * 20,
-                "score": score,
-                "product_size": 100,
-            },
+            KASPResult(
+                index=f"{base_key}-Allele-A",
+                primer_seq="A" * 20,
+                score=score,
+                product_size=100,
+            ),
+            KASPResult(
+                index=f"{base_key}-Allele-B",
+                primer_seq="A" * 20,
+                score=score,
+                product_size=100,
+            ),
+            KASPResult(
+                index=f"{base_key}-Common",
+                primer_seq="A" * 20,
+                score=score,
+                product_size=100,
+            ),
         ]
 
     def test_pass_beats_warning(self):
@@ -392,24 +393,24 @@ class TestSpecificityBlastRunner:
     def test_prepare_primer_fasta(self):
         """Test tail stripping and FASTA writing."""
         kasp = [
-            {
-                "index": "1-0-Allele-A",
-                "primer_seq": "GAAGGTGACCAAGTTCATGCTACGTACGTACGT",
-                "score": 5.0,
-                "product_size": 100,
-            },
-            {
-                "index": "1-0-Allele-B",
-                "primer_seq": "GAAGGTCGGAGTCAACGGATTACGTACGTACGA",
-                "score": 5.0,
-                "product_size": 100,
-            },
-            {
-                "index": "1-0-Common",
-                "primer_seq": "TGCATGCATGCATGCA",
-                "score": 5.0,
-                "product_size": 100,
-            },
+            KASPResult(
+                index="1-0-Allele-A",
+                primer_seq="GAAGGTGACCAAGTTCATGCTACGTACGTACGT",
+                score=5.0,
+                product_size=100,
+            ),
+            KASPResult(
+                index="1-0-Allele-B",
+                primer_seq="GAAGGTCGGAGTCAACGGATTACGTACGTACGA",
+                score=5.0,
+                product_size=100,
+            ),
+            KASPResult(
+                index="1-0-Common",
+                primer_seq="TGCATGCATGCATGCA",
+                score=5.0,
+                product_size=100,
+            ),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
             runner = SpecificityBlastRunner(Path("/dummy/ref"), threads=1)

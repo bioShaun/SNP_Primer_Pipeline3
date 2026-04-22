@@ -20,8 +20,10 @@ def designer(tmp_path: Path) -> CAPSDesigner:
     return CAPSDesigner(primer3_path=fake, enzyme_file=None)
 
 
-def test_reverse_complement_caps_lowercase(designer: CAPSDesigner) -> None:
-    assert designer._reverse_complement("gatc") == "gatc"
+def test_reverse_complement_caps_lowercase() -> None:
+    from snp_primer_pipeline.models import reverse_complement
+
+    assert reverse_complement("gatc") == "gatc"
 
 
 def test_test_enzyme_caps_different_cut_counts(designer: CAPSDesigner) -> None:

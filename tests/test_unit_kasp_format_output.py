@@ -7,13 +7,14 @@ precision), or specificity/best-primer integration without failing a test.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from snp_primer_pipeline.core.specificity import SpecificityResult, SpecificityStatus
-from snp_primer_pipeline.primers.kasp import KASPDesigner
+from snp_primer_pipeline.primers.kasp import KASPDesigner, KASPResult
 
 if TYPE_CHECKING:
     from typing import Any
@@ -94,35 +95,33 @@ def _make_result(
     product_size: int = 150,
     design_quality: str | None = "STRICT",
     score: float = 1.2345,
-) -> dict[str, Any]:
-    """Build a kasp_result dict matching the shape emitted by design_primers."""
-    result: dict[str, Any] = {
-        "index": index,
-        "product_size": product_size,
-        "direction": direction,
-        "start": start,
-        "end": end,
-        "genomic_start": genomic_start,
-        "genomic_end": genomic_end,
-        "diff_num": diff_num,
-        "diff_three_all": diff_three_all,
-        "length": len(primer_seq),
-        "tm": tm,
-        "gc_percent": gc_percent,
-        "self_any": 2.3,
-        "self_end": 1.0,
-        "end_stability": 4.56,
-        "hairpin": 0.0,
-        "primer_seq": primer_seq,
-        "reverse_complement": reverse_complement,
-        "penalty": 0.75,
-        "compl_any": 3.25,
-        "compl_end": 1.5,
-        "score": score,
-    }
-    if design_quality is not None:
-        result["design_quality"] = design_quality
-    return result
+) -> KASPResult:
+    """Build a KASPResult matching the shape emitted by design_primers."""
+    return KASPResult(
+        index=index,
+        product_size=product_size,
+        direction=direction,
+        start=start,
+        end=end,
+        genomic_start=genomic_start,
+        genomic_end=genomic_end,
+        diff_num=diff_num,
+        diff_three_all=diff_three_all,
+        length=len(primer_seq),
+        tm=tm,
+        gc_percent=gc_percent,
+        self_any=2.3,
+        self_end=1.0,
+        end_stability=4.56,
+        hairpin=0.0,
+        primer_seq=primer_seq,
+        reverse_complement=reverse_complement,
+        penalty=0.75,
+        compl_any=3.25,
+        compl_end=1.5,
+        score=score,
+        design_quality=design_quality,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -283,7 +282,7 @@ def test_format_output_variant_sites_block_emitted_only_when_requested(
 # ---------------------------------------------------------------------------
 
 
-def _triplet(base_index: str) -> list[dict[str, Any]]:
+def _triplet(base_index: str) -> list[KASPResult]:
     """Build a complete (Allele-A, Allele-B, Common) triplet for a set."""
     a = _make_result(
         index=f"{base_index}-Allele-A",
@@ -347,7 +346,7 @@ def test_format_simple_output_missing_genomic_range_yields_na(
 ) -> None:
     out = tmp_path / "simple.tsv"
     triplet = _triplet("1")
-    triplet[0]["genomic_start"] = None  # Allele-A has no genomic coords
+    triplet[0] = replace(triplet[0], genomic_start=None)  # Allele-A has no genomic coords
 
     designer.format_simple_output(triplet, snp_name="SNP1", output_file=out)
 
