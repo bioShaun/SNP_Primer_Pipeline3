@@ -2,21 +2,27 @@
 
 from __future__ import annotations
 
+import logging
 import re
 import subprocess
 from pathlib import Path
 
-from loguru import logger
-
 from ..exceptions import ParseError
 from ..models import SNP
+
+logger = logging.getLogger(__name__)
 
 
 class PolymarkerParser:
     """Parser for polymarker format input files."""
 
+    POLYMARKER_FIELD_COUNT = 3
+    COORDINATE_FIELD_COUNT = 4
+    MIN_FLANKING_LENGTH = 20
+    FASTA_MIN_LINES = 2
+
     # IUPAC ambiguity code mapping
-    IUPAC_MAP = {
+    IUPAC_MAP: dict[str, str] = {
         "[A/G]": "R",
         "[G/A]": "R",
         "[C/T]": "Y",
@@ -54,8 +60,8 @@ class PolymarkerParser:
         try:
             with open(input_file, encoding="utf-8") as f:
                 # Read first non-empty, non-comment line
-                for line in f:
-                    line = line.strip()
+                for raw_line in f:
+                    line = raw_line.strip()
                     if not line or line.startswith("#"):
                         continue
 
@@ -63,17 +69,22 @@ class PolymarkerParser:
                     parts = [p.strip() for p in line.split(",")] if "," in line else line.split()
 
                     # Check for polymarker format (must contain brackets and have 3 fields)
-                    if "[" in line and "]" in line and len(parts) == 3:
+                    if (
+                        "[" in line
+                        and "]" in line
+                        and len(parts) == PolymarkerParser.POLYMARKER_FIELD_COUNT
+                    ):
                         return "polymarker"
 
                     # Check for coordinate format (4 fields)
-                    if len(parts) == 4:
+                    if len(parts) == PolymarkerParser.COORDINATE_FIELD_COUNT:
                         # Validate that position is numeric
                         try:
                             int(parts[1])
-                            return "coordinates"
                         except ValueError:
                             pass
+                        else:
+                            return "coordinates"
 
                     # If first line doesn't match either format, it's an error
                     raise ParseError(
@@ -95,9 +106,9 @@ class PolymarkerParser:
 
         try:
             with open(self.input_file, encoding="utf-8") as f:
-                for line in f:
+                for raw_line in f:
                     line_number += 1
-                    line = line.strip()
+                    line = raw_line.strip()
 
                     # Skip empty lines
                     if not line:
@@ -114,7 +125,7 @@ class PolymarkerParser:
                     except ParseError as e:
                         logger.warning(f"Skipping invalid line {line_number}: {e}")
                         continue
-                    except Exception as e:
+                    except (ValueError, IndexError) as e:
                         logger.warning(f"Unexpected error parsing line {line_number}: {e}")
                         continue
 
@@ -127,17 +138,16 @@ class PolymarkerParser:
     def _parse_line(self, line: str, line_number: int) -> SNP | None:
         """Parse a single line of polymarker input."""
         # Split by comma if present, else by whitespace
-        if "," in line:
-            parts = [p.strip() for p in line.split(",")]
-        else:
-            parts = line.split()
+        parts = [p.strip() for p in line.split(",")] if "," in line else line.split()
 
         # Remove internal spaces in strings if any (polymarker usually doesn't have internal spaces)
         parts = [p.replace(" ", "") for p in parts]
 
-        if len(parts) != 3:
+        if len(parts) != self.POLYMARKER_FIELD_COUNT:
             raise ParseError(
-                f"Expected 3 fields, got {len(parts)}", line_number=line_number, line_content=line
+                f"Expected {self.POLYMARKER_FIELD_COUNT} fields, got {len(parts)}",
+                line_number=line_number,
+                line_content=line,
             )
 
         snp_name, chromosome, sequence = parts
@@ -171,7 +181,7 @@ class PolymarkerParser:
 
         # Validate flanking sequence length
         flanking_sequence = sequence.replace(bracket_code, iupac_code)
-        if len(flanking_sequence) < 20:
+        if len(flanking_sequence) < self.MIN_FLANKING_LENGTH:
             logger.warning(
                 f"Short flanking sequence ({len(flanking_sequence)} bp) for SNP {snp_name}"
             )
@@ -232,21 +242,18 @@ class PolymarkerParser:
 
         try:
             with open(self.input_file, encoding="utf-8") as f:
-                for line in f:
+                for raw_line in f:
                     line_number += 1
-                    line = line.strip()
+                    line = raw_line.strip()
 
                     if not line or line.startswith("#"):
                         continue
 
-                    if "," in line:
-                        parts = [p.strip() for p in line.split(",")]
-                    else:
-                        parts = line.split()
+                    parts = [p.strip() for p in line.split(",")] if "," in line else line.split()
 
-                    if len(parts) != 4:
+                    if len(parts) != self.COORDINATE_FIELD_COUNT:
                         logger.warning(
-                            f"Skipping line {line_number}: expected 4 fields, got {len(parts)}"
+                            f"Skipping line {line_number}: expected {self.COORDINATE_FIELD_COUNT} fields, got {len(parts)}"
                         )
                         continue
 
@@ -403,7 +410,7 @@ class PolymarkerParser:
 
                 # Parse FASTA output (skip header line)
                 lines = result.stdout.strip().split("\n")
-                if len(lines) >= 2:
+                if len(lines) >= self.FASTA_MIN_LINES:
                     seq = "".join(lines[1:])  # Join all sequence lines
                     sequences[coord["name"]] = seq
                 else:
@@ -412,7 +419,7 @@ class PolymarkerParser:
             except subprocess.CalledProcessError as e:
                 logger.warning(f"Failed to fetch sequence for {coord['name']}: {e.stderr}")
                 continue
-            except Exception as e:
+            except (OSError, KeyError) as e:
                 logger.warning(f"Error fetching sequence for {coord['name']}: {e}")
                 continue
 
@@ -434,7 +441,7 @@ class PolymarkerParser:
         if not self.snps:
             return {"total_snps": 0}
 
-        chromosomes = set(snp.chromosome for snp in self.snps)
+        chromosomes = {snp.chromosome for snp in self.snps}
         alleles = set()
         for snp in self.snps:
             alleles.add(snp.allele_a)

@@ -12,7 +12,9 @@ class PipelineError(Exception):
 class ParseError(PipelineError):
     """Exception raised during input parsing."""
 
-    def __init__(self, message: str, line_number: int = None, line_content: str = None):
+    def __init__(
+        self, message: str, line_number: int | None = None, line_content: str | None = None
+    ):
         self.line_number = line_number
         self.line_content = line_content
 
@@ -27,7 +29,7 @@ class ParseError(PipelineError):
 class BlastError(PipelineError):
     """Exception raised during BLAST execution or parsing."""
 
-    def __init__(self, message: str, command: str = None, return_code: int = None):
+    def __init__(self, message: str, command: str | None = None, return_code: int | None = None):
         self.command = command
         self.return_code = return_code
 
@@ -42,7 +44,9 @@ class BlastError(PipelineError):
 class AlignmentError(PipelineError):
     """Exception raised during multiple sequence alignment."""
 
-    def __init__(self, message: str, snp_name: str = None, sequence_count: int = None):
+    def __init__(
+        self, message: str, snp_name: str | None = None, sequence_count: int | None = None
+    ):
         self.snp_name = snp_name
         self.sequence_count = sequence_count
 
@@ -57,7 +61,7 @@ class AlignmentError(PipelineError):
 class PrimerDesignError(PipelineError):
     """Exception raised during primer design."""
 
-    def __init__(self, message: str, snp_name: str = None, design_type: str = None):
+    def __init__(self, message: str, snp_name: str | None = None, design_type: str | None = None):
         self.snp_name = snp_name
         self.design_type = design_type
 
@@ -72,7 +76,7 @@ class PrimerDesignError(PipelineError):
 class ConfigurationError(PipelineError):
     """Exception raised for configuration errors."""
 
-    def __init__(self, message: str, config_file: str = None, parameter: str = None):
+    def __init__(self, message: str, config_file: str | None = None, parameter: str | None = None):
         self.config_file = config_file
         self.parameter = parameter
 

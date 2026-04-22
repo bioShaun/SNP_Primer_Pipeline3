@@ -85,7 +85,7 @@ class Primer3Input:
                 # If relative path fails, use absolute path
                 self.settings["PRIMER_THERMODYNAMIC_PARAMETERS_PATH"] = str(config_dir) + "/"
 
-    def load_config(self, config_path: Path) -> "Primer3Input":
+    def load_config(self, config_path: Path) -> Primer3Input:
         """
         Load settings from configuration file.
 
@@ -97,8 +97,8 @@ class Primer3Input:
         """
         try:
             with open(config_path) as f:
-                for line in f:
-                    line = line.strip()
+                for raw_line in f:
+                    line = raw_line.strip()
                     if not line or line.startswith("#"):
                         continue
 
@@ -109,10 +109,7 @@ class Primer3Input:
 
                         # Try to convert to appropriate type
                         if value.replace(".", "").replace("-", "").isdigit():
-                            if "." in value:
-                                value = float(value)
-                            else:
-                                value = int(value)
+                            value = float(value) if "." in value else int(value)
 
                         self.settings[key] = value
         except OSError as e:
@@ -120,33 +117,33 @@ class Primer3Input:
 
         return self
 
-    def set_template(self, sequence: str) -> "Primer3Input":
+    def set_template(self, sequence: str) -> Primer3Input:
         """Set template sequence."""
         self.settings["SEQUENCE_TEMPLATE"] = sequence
         return self
 
-    def set_product_size_range(self, ranges: list[tuple[int, int]]) -> "Primer3Input":
+    def set_product_size_range(self, ranges: list[tuple[int, int]]) -> Primer3Input:
         """Set product size ranges."""
         range_str = " ".join(f"{start}-{end}" for start, end in ranges)
         self.settings["PRIMER_PRODUCT_SIZE_RANGE"] = range_str
         return self
 
-    def set_force_left_end(self, position: int) -> "Primer3Input":
+    def set_force_left_end(self, position: int) -> Primer3Input:
         """Force left primer to end at specific position."""
         self.settings["SEQUENCE_FORCE_LEFT_END"] = position
         return self
 
-    def set_force_right_end(self, position: int) -> "Primer3Input":
+    def set_force_right_end(self, position: int) -> Primer3Input:
         """Force right primer to end at specific position."""
         self.settings["SEQUENCE_FORCE_RIGHT_END"] = position
         return self
 
-    def set_target(self, start: int, length: int) -> "Primer3Input":
+    def set_target(self, start: int, length: int) -> Primer3Input:
         """Set target region."""
         self.settings["TARGET"] = f"{start},{length}"
         return self
 
-    def set_excluded_region(self, start: int, length: int) -> "Primer3Input":
+    def set_excluded_region(self, start: int, length: int) -> Primer3Input:
         """Set excluded region."""
         if "PRIMER_EXCLUDED_REGION" not in self.settings:
             self.settings["PRIMER_EXCLUDED_REGION"] = []
@@ -155,7 +152,7 @@ class Primer3Input:
         self.settings["PRIMER_EXCLUDED_REGION"].append(f"{start},{length}")
         return self
 
-    def set_setting(self, key: str, value: Any) -> "Primer3Input":
+    def set_setting(self, key: str, value: Any) -> Primer3Input:
         """Set arbitrary Primer3 setting."""
         self.settings[key] = value
         return self
@@ -221,13 +218,12 @@ class Primer3Runner:
                 subprocess.run(
                     cmd, stdin=infile, stdout=outfile, stderr=subprocess.PIPE, text=True, check=True
                 )
-
-            return Path(output_file)
-
         except subprocess.CalledProcessError as e:
             raise PrimerDesignError(f"Primer3 execution failed: {e.stderr}") from e
         except FileNotFoundError as e:
             raise PrimerDesignError(f"Primer3 not found: {e}") from e
+        else:
+            return Path(output_file)
 
     def run_string(self, input_string: str) -> str:
         """
@@ -248,13 +244,12 @@ class Primer3Runner:
             result = subprocess.run(
                 cmd, input=input_string, capture_output=True, text=True, check=True
             )
-
-            return result.stdout
-
         except subprocess.CalledProcessError as e:
             raise PrimerDesignError(f"Primer3 execution failed: {e.stderr}") from e
         except FileNotFoundError as e:
             raise PrimerDesignError(f"Primer3 not found: {e}") from e
+        else:
+            return result.stdout
 
 
 class Primer3OutputParser:
@@ -320,8 +315,8 @@ class Primer3OutputParser:
         """Parse a single Primer3 output record."""
         data = {}
 
-        for line in record.split("\n"):
-            line = line.strip()
+        for raw_line in record.split("\n"):
+            line = raw_line.strip()
             if not line or "=" not in line:
                 continue
 

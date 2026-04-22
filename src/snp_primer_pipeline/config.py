@@ -78,39 +78,6 @@ class PipelineConfig:
         except TypeError as e:
             raise ConfigurationError(f"Invalid config parameters: {e}") from e
 
-    @classmethod
-    def from_args(cls, args: dict) -> PipelineConfig:
-        """Create configuration from command-line arguments."""
-        # Map command-line argument names to config field names
-        arg_mapping = {
-            "input": "input_file",
-            "reference": "reference_file",
-            "output": "output_dir",
-            "caps": "design_caps",
-            "kasp": "design_kasp",
-            "price": "max_price",
-            "max_tm": "max_tm",
-            "max_size": "max_primer_size",
-            "pick_anyway": "pick_anyway",
-            "threads": "threads",
-            "log_level": "log_level",
-        }
-
-        config_args = {}
-        for arg_name, config_name in arg_mapping.items():
-            if arg_name in args and args[arg_name] is not None:
-                config_args[config_name] = args[arg_name]
-
-        # Convert boolean flags (0/1 to bool)
-        if "design_caps" in config_args:
-            config_args["design_caps"] = bool(config_args["design_caps"])
-        if "design_kasp" in config_args:
-            config_args["design_kasp"] = bool(config_args["design_kasp"])
-        if "pick_anyway" in config_args:
-            config_args["pick_anyway"] = bool(config_args["pick_anyway"])
-
-        return cls(**config_args)
-
 
 @dataclass
 class SoftwarePaths:
