@@ -11,6 +11,9 @@ import yaml
 
 from .exceptions import ConfigurationError
 
+_MAX_TM_LIMIT = 100.0
+_MAX_PRIMER_SIZE_LIMIT = 100
+
 
 @dataclass
 class PipelineConfig:
@@ -44,10 +47,10 @@ class PipelineConfig:
         if not self.input_file.exists():
             raise ConfigurationError(f"Input file not found: {self.input_file}")
 
-        if self.max_tm <= 0 or self.max_tm > 100:
+        if self.max_tm <= 0 or self.max_tm > _MAX_TM_LIMIT:
             raise ConfigurationError(f"Invalid max_tm: {self.max_tm}")
 
-        if self.max_primer_size <= 0 or self.max_primer_size > 100:
+        if self.max_primer_size <= 0 or self.max_primer_size > _MAX_PRIMER_SIZE_LIMIT:
             raise ConfigurationError(f"Invalid max_primer_size: {self.max_primer_size}")
 
         if self.threads <= 0:
