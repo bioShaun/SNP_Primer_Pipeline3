@@ -17,6 +17,10 @@ from ..models import BlastHit, FlankingRegion, Strand
 
 logger = logging.getLogger(__name__)
 
+_BLAST_FIELD_COUNT = 15
+_MIN_QUERY_ID_PARTS = 3
+_MIN_FASTA_LINES = 2
+
 
 class BlastRunner:
     """BLAST execution wrapper."""
@@ -106,7 +110,7 @@ class BlastParser:
                         continue
 
                     fields = stripped.split("\t")
-                    if len(fields) < 15:
+                    if len(fields) < _BLAST_FIELD_COUNT:
                         continue
 
                     try:
@@ -280,7 +284,7 @@ class FlankingExtractor:
                 return parsed
 
         parts = query_id.split("_")
-        if len(parts) >= 3:
+        if len(parts) >= _MIN_QUERY_ID_PARTS:
             snp_name = "_".join(parts[:-2])
             chrom = parts[-2]
             allele = parts[-1]
@@ -404,7 +408,7 @@ class FlankingExtractor:
 
                     # Parse output and write to file
                     lines = result.stdout.strip().split("\n")
-                    if len(lines) >= 2:
+                    if len(lines) >= _MIN_FASTA_LINES:
                         sequence = "".join(lines[1:])  # Skip header line
                         f.write(f">{seq_id}\n{sequence}\n")
 

@@ -7,6 +7,7 @@ This module handles multiple sequence alignment and variant site identification.
 
 from __future__ import annotations
 
+import contextlib
 import subprocess
 import tempfile
 from dataclasses import dataclass
@@ -15,6 +16,11 @@ from pathlib import Path
 from ..exceptions import AlignmentError
 from .fasta import parse_fasta
 
+_AT_TM = 2
+_CG_TM = 4
+_MAX_GAP_DIFF = 4
+_GAP_BOUNDARY = 20
+
 
 # V2-compatible helper functions
 def _tm_simple(seq: str) -> int:
@@ -22,9 +28,9 @@ def _tm_simple(seq: str) -> int:
     t = 0
     for a in seq.upper():
         if a in "AT":
-            t += 2
+            t += _AT_TM
         if a in "CG":
-            t += 4
+            t += _CG_TM
     return t
 
 
@@ -139,8 +145,8 @@ def _get_homeo_seq(fasta: dict, target: str, ids: list, align_left: int, align_r
 
         score2 = _score_pairwise(target_seq.replace("-", ""), seqk)
 
-        # If score in alignment is better and gaps < 4, use gap-removed version
-        if score1 > score2 and _gap_diff(target_seq, homeo_seq) < 4:
+        # If score in alignment is better and gaps < _MAX_GAP_DIFF, use gap-removed version
+        if score1 > score2 and _gap_diff(target_seq, homeo_seq) < _MAX_GAP_DIFF:
             seqk = "".join([homeo_seq[i] for i, c in enumerate(target_seq) if c != "-"])
 
         seq2comp.append(seqk)
@@ -328,7 +334,7 @@ class MultipleSequenceAlignment:
                 continue
 
             # V2-style boundary check
-            if pos_template < 20 or pos_template > template_length - 20:
+            if pos_template < _GAP_BOUNDARY or pos_template > template_length - _GAP_BOUNDARY:
                 continue
 
             # Compare with other sequences at the same alignment position
@@ -430,7 +436,7 @@ class MultipleSequenceAlignment:
                 continue
 
             # V2 boundary check
-            if pos_template < 20 or pos_template > template_length - 20:
+            if pos_template < _GAP_BOUNDARY or pos_template > template_length - _GAP_BOUNDARY:
                 continue
 
             nd = 0  # number of differences
@@ -532,7 +538,7 @@ class MultipleSequenceAligner:
 
         # Get software paths
         if software_paths is None:
-            from ..config import SoftwarePaths
+            from ..config import SoftwarePaths  # noqa: PLC0415
 
             self.software_paths = SoftwarePaths.auto_detect()
         else:
@@ -551,7 +557,8 @@ class MultipleSequenceAligner:
         Raises:
             AlignmentError: If alignment fails
         """
-        if len(sequences) < 2:
+        min_align_sequences = 2
+        if len(sequences) < min_align_sequences:
             raise AlignmentError("At least 2 sequences required for alignment")
 
         # Create temporary input file
@@ -578,15 +585,11 @@ class MultipleSequenceAligner:
         finally:
             # Clean up temporary files; each unlink is independent so that a
             # failure to create one file does not leak the other.
-            try:
+            with contextlib.suppress(OSError):
                 tmp_input_path.unlink()
-            except OSError:
-                pass
             if tmp_output_path is not None:
-                try:
+                with contextlib.suppress(OSError):
                     tmp_output_path.unlink()
-                except OSError:
-                    pass
 
     def align_file(self, fasta_file: Path, output_file: Path) -> MultipleSequenceAlignment:
         """
