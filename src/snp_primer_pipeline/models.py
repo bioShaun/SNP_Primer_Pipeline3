@@ -5,6 +5,48 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 
+_COMPLEMENT_MAP = {
+    "A": "T",
+    "T": "A",
+    "G": "C",
+    "C": "G",
+    "a": "t",
+    "t": "a",
+    "g": "c",
+    "c": "g",
+    "R": "Y",
+    "Y": "R",
+    "S": "S",
+    "W": "W",
+    "K": "M",
+    "M": "K",
+    "N": "N",
+    "r": "y",
+    "y": "r",
+    "s": "s",
+    "w": "w",
+    "k": "m",
+    "m": "k",
+    "n": "n",
+    "B": "V",
+    "V": "B",
+    "D": "H",
+    "H": "D",
+    "b": "v",
+    "v": "b",
+    "d": "h",
+    "h": "d",
+}
+
+
+def reverse_complement(seq: str) -> str:
+    """Return the reverse complement of a DNA sequence.
+
+    Handles standard bases (ATGC) and all IUPAC ambiguity codes,
+    preserving case. Unknown characters are kept as-is.
+    """
+    return "".join(_COMPLEMENT_MAP.get(base, base) for base in reversed(seq))
+
 
 class Strand(Enum):
     """DNA strand orientation."""
@@ -141,31 +183,7 @@ class Primer:
 
     def reverse_complement(self) -> str:
         """Get reverse complement of primer sequence."""
-        complement_map = {
-            "A": "T",
-            "T": "A",
-            "G": "C",
-            "C": "G",
-            "a": "t",
-            "t": "a",
-            "g": "c",
-            "c": "g",
-            "R": "Y",
-            "Y": "R",
-            "S": "S",
-            "W": "W",
-            "K": "M",
-            "M": "K",
-            "N": "N",
-            "r": "y",
-            "y": "r",
-            "s": "s",
-            "w": "w",
-            "k": "m",
-            "m": "k",
-            "n": "n",
-        }
-        return "".join(complement_map.get(base, base) for base in reversed(self.sequence))
+        return reverse_complement(self.sequence)
 
 
 @dataclass
