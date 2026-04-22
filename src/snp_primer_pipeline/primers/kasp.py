@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from ..core.alignment import MultipleSequenceAlignment
 from ..core.primer3_parser import Primer3Input, Primer3OutputParser, Primer3Runner
@@ -55,7 +55,14 @@ class KASPDesigner:
     """KASP primer designer matching V2 behavior."""
 
     # IUPAC code mapping
-    IUPAC_MAP = {"R": "AG", "Y": "TC", "S": "GC", "W": "AT", "K": "TG", "M": "AC"}
+    IUPAC_MAP: ClassVar[dict[str, str]] = {
+        "R": "AG",
+        "Y": "TC",
+        "S": "GC",
+        "W": "AT",
+        "K": "TG",
+        "M": "AC",
+    }
 
     def __init__(
         self,
@@ -247,7 +254,10 @@ class KASPDesigner:
         return self._convert_to_v2_format(final_primers, snp_position, snp_alleles, variant_sites)
 
     def _build_diffarray(
-        self, alignment: MultipleSequenceAlignment, target_name: str, snp_position: int
+        self,
+        alignment: MultipleSequenceAlignment,
+        target_name: str,
+        snp_position: int,  # noqa: ARG002
     ) -> None:
         """
         Build diffarray for V2-compatible filtering.
@@ -323,16 +333,7 @@ class KASPDesigner:
             p3_input.set_product_size_range([(50, 100), (100, 150), (150, 250)])
             p3_input.set_force_left_end(left_end + 1)  # Convert to 1-based
             p3_input.set_force_right_end(right_end + 1)
-            p3_input.set_setting("PRIMER_MAX_SIZE", self.max_size)
-            p3_input.set_setting("PRIMER_MIN_TM", 57.0)
-            p3_input.set_setting("PRIMER_OPT_TM", 60.0)
-            p3_input.set_setting("PRIMER_MAX_TM", self.max_tm)
-            p3_input.set_setting("PRIMER_PAIR_MAX_DIFF_TM", 6.0)
-            p3_input.set_setting("PRIMER_FIRST_BASE_INDEX", 1)
-            p3_input.set_setting("PRIMER_LIBERAL_BASE", 1)
-            p3_input.set_setting("PRIMER_NUM_RETURN", 5)
-            p3_input.set_setting("PRIMER_EXPLAIN_FLAG", 1)
-            p3_input.set_setting("PRIMER_PICK_ANYWAY", 1 if self.pick_anyway else 0)
+            p3_input.apply_designer_settings(self.max_size, self.max_tm, self.pick_anyway)
 
             sequence_id = f"var_{var_site + 1}"  # 1-based for output
             inputs.append((var_site, p3_input.generate(sequence_id)))
@@ -344,8 +345,8 @@ class KASPDesigner:
         template: str,
         snp_position: int,
         snp_alleles: tuple[str, str],
-        product_size_range: tuple[int, int],
-        output_dir: Path | None = None,
+        product_size_range: tuple[int, int],  # noqa: ARG002
+        output_dir: Path | None = None,  # noqa: ARG002
     ) -> list[KASPResult]:
         """
         Design primers when no homeologs found (V2 style).
@@ -365,16 +366,7 @@ class KASPDesigner:
             else:
                 p3_input.set_force_right_end(snp_position + 1)  # 1-based
 
-            p3_input.set_setting("PRIMER_MAX_SIZE", self.max_size)
-            p3_input.set_setting("PRIMER_MIN_TM", 57.0)
-            p3_input.set_setting("PRIMER_OPT_TM", 60.0)
-            p3_input.set_setting("PRIMER_MAX_TM", self.max_tm)
-            p3_input.set_setting("PRIMER_PAIR_MAX_DIFF_TM", 6.0)
-            p3_input.set_setting("PRIMER_FIRST_BASE_INDEX", 1)
-            p3_input.set_setting("PRIMER_LIBERAL_BASE", 1)
-            p3_input.set_setting("PRIMER_NUM_RETURN", 5)
-            p3_input.set_setting("PRIMER_EXPLAIN_FLAG", 1)
-            p3_input.set_setting("PRIMER_PICK_ANYWAY", 1 if self.pick_anyway else 0)
+            p3_input.apply_designer_settings(self.max_size, self.max_tm, self.pick_anyway)
 
             try:
                 output_string = self.primer3_runner.run_string(p3_input.generate(direction))
@@ -879,47 +871,3 @@ class KASPDesigner:
 
         except OSError as e:
             raise PrimerDesignError(f"Failed to write simple output file: {e}") from e
-
-    def _format_primer_line(
-        self,
-        index: str,
-        product_size: int,
-        primer: Primer,
-        penalty: float,
-        compl_any: float,
-        compl_end: float,
-        score: float,
-    ) -> str:
-        """Format a single primer line for output (legacy method)."""
-        # Convert to 1-based coordinates and match V2 format
-        if primer.direction == "LEFT":
-            start_out = primer.start + 1
-            end_out = primer.end + 1
-        else:
-            start_out = primer.end + 1
-            end_out = primer.start + 1
-
-        return "\t".join(
-            [
-                index,
-                str(product_size),
-                primer.direction,
-                str(start_out),
-                str(end_out),
-                str(primer.diff_num),
-                "YES" if primer.diff_three_all else "NO",
-                str(primer.length),
-                f"{primer.tm:.2f}",
-                f"{primer.gc_percent:.2f}",
-                f"{primer.self_any:.2f}",
-                f"{primer.self_end:.2f}",
-                f"{primer.end_stability:.2f}",
-                f"{primer.hairpin:.2f}",
-                primer.sequence,
-                reverse_complement(primer.sequence),
-                f"{penalty:.2f}",
-                f"{compl_any:.2f}",
-                f"{compl_end:.2f}",
-                f"{score:.2f}",
-            ]
-        )

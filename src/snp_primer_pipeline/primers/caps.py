@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import ClassVar
 
 from ..core.primer3_parser import Primer3Input, Primer3OutputParser, Primer3Runner
 from ..exceptions import PrimerDesignError
@@ -21,10 +22,17 @@ class CAPSDesigner:
     ENZYME_FILE_FIELD_COUNT = 2
 
     # IUPAC code mapping
-    IUPAC_MAP: dict[str, str] = {"R": "AG", "Y": "TC", "S": "GC", "W": "AT", "K": "TG", "M": "AC"}
+    IUPAC_MAP: ClassVar[dict[str, str]] = {
+        "R": "AG",
+        "Y": "TC",
+        "S": "GC",
+        "W": "AT",
+        "K": "TG",
+        "M": "AC",
+    }
 
     # IUPAC to regex pattern mapping
-    IUPAC_PATTERNS: dict[str, str] = {
+    IUPAC_PATTERNS: ClassVar[dict[str, str]] = {
         "A": "A",
         "T": "T",
         "G": "G",
@@ -45,7 +53,7 @@ class CAPSDesigner:
     def __init__(
         self,
         primer3_path: Path | None = None,
-        config_path: Path | None = None,
+        config_path: Path | None = None,  # noqa: ARG002
         enzyme_file: Path | None = None,
         max_tm: float = 63.0,
         max_size: int = 25,
@@ -376,10 +384,7 @@ class CAPSDesigner:
             start, length = target_region
             p3_input.set_target(start, length)
 
-        p3_input.set_setting("PRIMER_MAX_SIZE", self.max_size)
-        p3_input.set_setting("PRIMER_MAX_TM", self.max_tm)
-        p3_input.set_setting("PRIMER_PICK_ANYWAY", 1 if self.pick_anyway else 0)
-        p3_input.set_setting("PRIMER_NUM_RETURN", 5)
+        p3_input.apply_designer_settings(self.max_size, self.max_tm, self.pick_anyway)
 
         return p3_input.generate(sequence_id)
 
