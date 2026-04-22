@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from ..exceptions import BlastError
 
 if TYPE_CHECKING:
-    from typing import Any
+    from ..primers.kasp import KASPResult
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ def parse_btop(btop: str) -> list:
 
 
 def check_three_prime_match(
-    btop: str, query_start: int, query_end: int, qlen: int, n_bases: int = 2
+    btop: str, _query_start: int, query_end: int, qlen: int, n_bases: int = 2
 ) -> bool:
     """
     Check if the 3' end of the primer has 0 mismatches.
@@ -190,13 +190,15 @@ def check_three_prime_match(
 class SpecificityBlastRunner:
     """Run blastn-short on KASP primers for off-target assessment."""
 
+    BLAST_FIELD_COUNT = 12
+
     def __init__(self, reference: Path, threads: int = 1):
         self.reference = Path(reference)
         self.threads = threads
 
     def prepare_primer_fasta(
         self,
-        kasp_results: list[dict[str, Any]],
+        kasp_results: list[KASPResult],
         snp_name: str,
         output_dir: Path,
     ) -> Path | None:
@@ -227,11 +229,11 @@ class SpecificityBlastRunner:
                 common = kasp_results[i + 2]
 
                 # Base key for this primer set
-                base_key = allele_a["index"].rsplit("-", 2)[0]
+                base_key = allele_a.index.rsplit("-", 2)[0]
 
                 # Allele-specific primers: strip tails
                 for label, result in [("F1", allele_a), ("F2", allele_b)]:
-                    seq = result["primer_seq"].upper()
+                    seq = result.primer_seq.upper()
                     # Strip FAM or HEX tail
                     for tail in [FAM_TAIL, HEX_TAIL]:
                         if seq.startswith(tail):
@@ -243,7 +245,7 @@ class SpecificityBlastRunner:
                         written.add(primer_id)
 
                 # Common primer: no tail
-                seq = common["primer_seq"].upper()
+                seq = common.primer_seq.upper()
                 primer_id = f"{snp_name}_{base_key}_R"
                 if primer_id not in written:
                     f.write(f">{primer_id}\n{seq}\n")
@@ -291,11 +293,12 @@ class SpecificityBlastRunner:
 
         try:
             subprocess.run(cmd, capture_output=True, text=True, check=True)
-            return output_file
         except subprocess.CalledProcessError as e:
             raise BlastError(f"Specificity BLAST failed: {e.stderr}") from e
         except FileNotFoundError as e:
             raise BlastError(f"BLAST not found in PATH: {e}") from e
+        else:
+            return output_file
 
 
 class SpecificityAssessor:
@@ -305,6 +308,8 @@ class SpecificityAssessor:
     Applies Fail (off-target amplification) and Warning (primer sponge)
     criteria per the assessment standard document.
     """
+
+    BLAST_FIELD_COUNT = 12
 
     def __init__(
         self,
@@ -341,12 +346,12 @@ class SpecificityAssessor:
             return hits
 
         with open(blast_file) as f:
-            for line in f:
-                line = line.strip()
+            for raw_line in f:
+                line = raw_line.strip()
                 if not line or line.startswith("#"):
                     continue
                 fields = line.split("\t")
-                if len(fields) < 12:
+                if len(fields) < self.BLAST_FIELD_COUNT:
                     continue
                 try:
                     hit = OfftargetHit(
@@ -391,12 +396,11 @@ class SpecificityAssessor:
             return False
 
         # Parameter A: 3' end 2bp perfect match
-        if not check_three_prime_match(
-            hit.btop, hit.qstart, hit.qend, hit.qlen, self.fail_three_prime_bases
-        ):
-            return False
-
-        return True
+        return bool(
+            check_three_prime_match(
+                hit.btop, hit.qstart, hit.qend, hit.qlen, self.fail_three_prime_bases
+            )
+        )
 
     def _check_fail_pair(self, f_hit: OfftargetHit, r_hit: OfftargetHit) -> bool:
         """
@@ -435,10 +439,7 @@ class SpecificityAssessor:
 
         # Parameter C: distance between 3' ends
         distance = rev_3prime - fwd_3prime
-        if distance < self.fail_distance_range[0] or distance > self.fail_distance_range[1]:
-            return False
-
-        return True
+        return bool(self.fail_distance_range[0] <= distance <= self.fail_distance_range[1])
 
     def _count_effective_hits(
         self,
@@ -457,7 +458,7 @@ class SpecificityAssessor:
 
     def assess(
         self,
-        kasp_results: list[dict[str, Any]],
+        kasp_results: list[KASPResult],
         blast_hits: dict[str, list[OfftargetHit]],
         snp_name: str,
         target_chrom: str,
@@ -483,7 +484,7 @@ class SpecificityAssessor:
                 break
 
             allele_a = kasp_results[i]
-            base_key = allele_a["index"].rsplit("-", 2)[0]
+            base_key = allele_a.index.rsplit("-", 2)[0]
 
             f1_id = f"{snp_name}_{base_key}_F1"
             f2_id = f"{snp_name}_{base_key}_F2"
@@ -556,7 +557,7 @@ class SpecificityAssessor:
 
     @staticmethod
     def select_best(
-        kasp_results: list[dict[str, Any]],
+        kasp_results: list[KASPResult],
         specificity_results: dict[str, SpecificityResult],
     ) -> str | None:
         """
@@ -581,8 +582,8 @@ class SpecificityAssessor:
                 break
 
             allele_a = kasp_results[i]
-            base_key = allele_a["index"].rsplit("-", 2)[0]
-            score = allele_a.get("score", 0.0)
+            base_key = allele_a.index.rsplit("-", 2)[0]
+            score = allele_a.score
             if isinstance(score, str):
                 try:
                     score = float(score)

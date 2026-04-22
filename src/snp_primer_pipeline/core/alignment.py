@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ..exceptions import AlignmentError
+from .fasta import parse_fasta
 
 
 # V2-compatible helper functions
@@ -250,8 +251,8 @@ class MultipleSequenceAlignment:
     def find_variant_sites(
         self,
         target_name: str,
-        min_gap_left: int = 20,
-        min_gap_right: int = 20,
+        min_gap_left: int = 20,  # noqa: ARG002
+        min_gap_right: int = 20,  # noqa: ARG002
     ) -> tuple[list[int], list[int]]:
         """
         Find variant sites in the alignment using V2 logic.
@@ -346,13 +347,11 @@ class MultipleSequenceAlignment:
                 else:
                     diff_from_all = False
 
-            if diff_from_any:
-                if pos_template not in sites_diff_any:  # avoid duplicates from gaps
-                    sites_diff_any.append(pos_template)
+            if diff_from_any and pos_template not in sites_diff_any:  # avoid duplicates from gaps
+                sites_diff_any.append(pos_template)
 
-            if diff_from_all:
-                if pos_template not in sites_diff_all:  # avoid duplicates from gaps
-                    sites_diff_all.append(pos_template)
+            if diff_from_all and pos_template not in sites_diff_all:  # avoid duplicates from gaps
+                sites_diff_all.append(pos_template)
 
         return sorted(sites_diff_all), sorted(sites_diff_any)
 
@@ -461,10 +460,7 @@ class MultipleSequenceAlignment:
 
             # Compare bases (V2 style)
             for m, k in enumerate(seq2comp):
-                if pos_template < snp_position:
-                    b2 = k[-1] if k else "-"  # Last base of extracted sequence
-                else:
-                    b2 = k[0] if k else "-"  # First base of extracted sequence
+                b2 = (k[-1] if k else "-") if pos_template < snp_position else (k[0] if k else "-")
 
                 if b1 != b2:
                     nd += 1
@@ -474,14 +470,12 @@ class MultipleSequenceAlignment:
             diffarray[pos_template] = da
 
             # Check if differs from all
-            if nd == len(ids):
-                if pos_template not in variation:
-                    variation.append(pos_template)
+            if nd == len(ids) and pos_template not in variation:
+                variation.append(pos_template)
 
             # Check if differs from any
-            if nd > 0:
-                if pos_template not in variation2:
-                    variation2.append(pos_template)
+            if nd > 0 and pos_template not in variation2:
+                variation2.append(pos_template)
 
         return sorted(variation), sorted(variation2), diffarray
 
@@ -646,34 +640,10 @@ class MultipleSequenceAligner:
     def _parse_alignment_file(self, alignment_file: Path) -> MultipleSequenceAlignment:
         """Parse alignment file into MultipleSequenceAlignment object."""
         sequences = []
-        current_name = None
-        current_seq = []
 
         try:
-            with open(alignment_file) as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-
-                    if line.startswith(">"):
-                        # Save previous sequence
-                        if current_name is not None:
-                            sequences.append(
-                                AlignedSequence(name=current_name, sequence="".join(current_seq))
-                            )
-
-                        # Start new sequence
-                        current_name = line[1:]
-                        current_seq = []
-                    else:
-                        current_seq.append(line)
-
-                # Save last sequence
-                if current_name is not None:
-                    sequences.append(
-                        AlignedSequence(name=current_name, sequence="".join(current_seq))
-                    )
+            for name, seq in parse_fasta(alignment_file):
+                sequences.append(AlignedSequence(name=name, sequence=seq))
 
             if not sequences:
                 raise AlignmentError("No sequences found in alignment file")

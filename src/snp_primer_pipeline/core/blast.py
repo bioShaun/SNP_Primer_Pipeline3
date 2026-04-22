@@ -7,12 +7,15 @@ This module handles BLAST execution, result parsing, and flanking region extract
 
 from __future__ import annotations
 
+import logging
 import subprocess
 from collections import Counter
 from pathlib import Path
 
 from ..exceptions import BlastError
 from ..models import BlastHit, FlankingRegion, Strand
+
+logger = logging.getLogger(__name__)
 
 
 class BlastRunner:
@@ -98,11 +101,11 @@ class BlastParser:
         try:
             with open(self.blast_file) as f:
                 for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#"):
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("#"):
                         continue
 
-                    fields = line.split("\t")
+                    fields = stripped.split("\t")
                     if len(fields) < 15:
                         continue
 
@@ -133,10 +136,10 @@ class BlastParser:
                         # Skip malformed lines
                         continue
 
-            return self.hits
-
         except OSError as e:
             raise BlastError(f"Failed to read BLAST file {self.blast_file}: {e}") from e
+        else:
+            return self.hits
 
 
 class FlankingExtractor:
@@ -199,9 +202,12 @@ class FlankingExtractor:
 
             for hit in hits:
                 # Skip hits on excluded chromosomes (target already extracted)
-                if exclude_chromosomes and snp_name in exclude_chromosomes:
-                    if hit.subject_id == exclude_chromosomes[snp_name]:
-                        continue
+                if (
+                    exclude_chromosomes
+                    and snp_name in exclude_chromosomes
+                    and hit.subject_id == exclude_chromosomes[snp_name]
+                ):
+                    continue
 
                 # Calculate adjusted identity (accounting for gaps)
                 pct_identity = 100 - (hit.mismatches + hit.gap_opens) / hit.alignment_length * 100
@@ -259,7 +265,7 @@ class FlankingExtractor:
                 and query_id not in target_regions
                 and query_id in top_hits
             ):
-                print(f"Warning: no hits on target chromosome for {query_id}. Using best hit.")
+                logger.warning("No hits on target chromosome for %s. Using best hit.", query_id)
                 # The region was already added in the first pass
 
         return flanking_regions
