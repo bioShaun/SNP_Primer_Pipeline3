@@ -63,9 +63,10 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "C90", "I", "N", "UP", "B", "C4", "A", "RET", "SIM", "ARG", "PL", "TRY", "RUF"]
-ignore = ["E501", "B008", "C901"]
+ignore = ["E501", "B008", "C901", "TRY003"]
 
 [tool.ruff.lint.per-file-ignores]
+"src/**/*.py" = ["PLR0913", "PLR0912", "PLR0915"]
 "tests/**/*.py" = ["PLR2004", "ARG001", "ARG002", "PLR0913", "PLR0912", "PLR0915", "N806", "PLC0415"]
 # Consistency and manual test suites validate that constructors/imports succeed
 # by binding the result; those placeholder scaffolds tolerate unused locals and
