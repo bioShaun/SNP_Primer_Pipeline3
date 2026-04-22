@@ -268,8 +268,8 @@ def run_pipeline(config: PipelineConfig) -> None:
                         all_specificity_results.update(results["specificity"])
                     if results.get("best_primer_key"):
                         all_best_primer_keys[snp.name] = results["best_primer_key"]
-            except (PipelineError, PrimerDesignError, BlastError, AlignmentError, OSError) as e:
-                logger.error(f"Failed to process SNP {snp.name}: {e}")
+            except (PipelineError, PrimerDesignError, BlastError, AlignmentError, OSError):
+                logger.exception("Failed to process SNP %s", snp.name)
                 failed_snps.append(snp.name)
                 continue
 
@@ -290,8 +290,8 @@ def run_pipeline(config: PipelineConfig) -> None:
             logger.warning(f"Skipped SNPs (no flanking regions): {', '.join(skipped_snps)}")
 
     # Catches all unhandled exceptions to provide context logging before re-raising
-    except Exception as e:
-        logger.error(f"Pipeline failed: {e}")
+    except Exception:
+        logger.exception("Pipeline failed")
         raise
 
 

@@ -6,6 +6,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
+from typing import ClassVar
 
 from ..exceptions import ParseError
 from ..models import SNP
@@ -22,7 +23,7 @@ class PolymarkerParser:
     FASTA_MIN_LINES = 2
 
     # IUPAC ambiguity code mapping
-    IUPAC_MAP: dict[str, str] = {
+    IUPAC_MAP: ClassVar[dict[str, str]] = {
         "[A/G]": "R",
         "[G/A]": "R",
         "[C/T]": "Y",
@@ -334,7 +335,7 @@ class PolymarkerParser:
                 target_regions: dict mapping snp_name -> FlankingRegion
                 target_sequences: dict mapping seq_id -> sequence string
         """
-        from ..models import FlankingRegion, Strand
+        from ..models import FlankingRegion, Strand  # noqa: PLC0415
 
         if not hasattr(self, "_coordinates") or not self._coordinates:
             raise ParseError("No coordinates available. Run parse_coordinates() first.")
