@@ -1,12 +1,14 @@
-# Byte-compiled / optimized / DLL files
+# ============================================
+# Python 编译和构建产物
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
 
-# Distribution / packaging
+# ============================================
+# 分发和打包
+# ============================================
 .Python
 build/
 develop-eggs/
@@ -31,11 +33,9 @@ MANIFEST
 *.manifest
 *.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
+# ============================================
+# 测试和覆盖率
+# ============================================
 htmlcov/
 .tox/
 .nox/
@@ -49,53 +49,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints/
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
+# ============================================
+# 虚拟环境
+# ============================================
 .env
 .venv
 env/
@@ -104,25 +60,9 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# IDEs
+# ============================================
+# IDE 和编辑器
+# ============================================
 .vscode/
 .idea/
 *.swp
@@ -130,11 +70,54 @@ dmypy.json
 *~
 .DS_Store
 
-# Project specific
+# ============================================
+# 类型检查和 Linting
+# ============================================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.ruff_cache/
+
+# ============================================
+# Jupyter Notebook
+# ============================================
+.ipynb_checkpoints/
+
+# ============================================
+# pyenv 和包管理器
+# ============================================
+.python-version
+Pipfile.lock
+__pypackages__/
+
+# ============================================
+# 项目特定忽略规则
+# ============================================
+
+# 输出目录
 output/
+
+# 日志文件
 *.log
+
+# 配置文件（可能包含敏感信息）
 config.yaml
 getkasp.xml
-output
-test_data/v3_test_output
-test_data/test*
+
+# 测试输出
+test_data/v3_test_output/
+test_data/test*/
+
+# 图分析工具输出
+.graphify_*
+graphify-out/
+
+# 其他工具
+.opencode/
+.sisyphus/
+
+# 临时和备份文件
+*.tmp
+*.bak
+*.orig
